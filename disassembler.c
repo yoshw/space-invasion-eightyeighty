@@ -45,15 +45,75 @@ int printDisassembledOp(unsigned char* codebuffer, int pc) {
     printf("%04x ", pc);
     switch(*codeAddress) {
         case 0x00: printf("NOP"); break;
-        case 0x01: printf("NOP"); break;
-        case 0x02: printf("NOP"); break;
-        case 0x03: printf("NOP"); break;
-        case 0x04: printf("NOP"); break;
-        case 0x05: printf("NOP"); break;
-        case 0x06: printf("NOP"); break;
-        case 0x07: printf("NOP"); break;
-        case 0x08: printf("NOP"); break;
-        case 0x09: printf("NOP"); break;
+
+        // Data Transfer Group
+        case 0x40: printf("MOV    B <- B"); break;
+        case 0x41: printf("MOV    B <- C"); break;
+        case 0x42: printf("MOV    B <- D"); break;
+        case 0x43: printf("MOV    B <- E"); break;
+        case 0x44: printf("MOV    B <- H"); break;
+        case 0x45: printf("MOV    B <- L"); break;
+        case 0x47: printf("MOV    B <- A"); break;
+        case 0x48: printf("MOV    C <- B"); break;
+        case 0x49: printf("MOV    C <- C"); break;
+        case 0x4a: printf("MOV    C <- D"); break;
+        case 0x4b: printf("MOV    C <- E"); break;
+        case 0x4c: printf("MOV    C <- H"); break;
+        case 0x4d: printf("MOV    C <- L"); break;
+        case 0x4f: printf("MOV    C <- A"); break;
+        case 0x50: printf("MOV    D <- B"); break;
+        case 0x51: printf("MOV    D <- C"); break;
+        case 0x52: printf("MOV    D <- D"); break;
+        case 0x53: printf("MOV    D <- E"); break;
+        case 0x54: printf("MOV    D <- H"); break;
+        case 0x55: printf("MOV    D <- L"); break;
+        case 0x57: printf("MOV    D <- A"); break;
+        case 0x58: printf("MOV    E <- B"); break;
+        case 0x59: printf("MOV    E <- C"); break;
+        case 0x5a: printf("MOV    E <- D"); break;
+        case 0x5b: printf("MOV    E <- E"); break;
+        case 0x5c: printf("MOV    E <- H"); break;
+        case 0x5d: printf("MOV    E <- L"); break;
+        case 0x5f: printf("MOV    E <- A"); break;
+        case 0x60: printf("MOV    H <- B"); break;
+        case 0x61: printf("MOV    H <- C"); break;
+        case 0x62: printf("MOV    H <- D"); break;
+        case 0x63: printf("MOV    H <- E"); break;
+        case 0x64: printf("MOV    H <- H"); break;
+        case 0x65: printf("MOV    H <- L"); break;
+        case 0x67: printf("MOV    H <- A"); break;
+        case 0x68: printf("MOV    L <- B"); break;
+        case 0x69: printf("MOV    L <- C"); break;
+        case 0x6a: printf("MOV    L <- D"); break;
+        case 0x6b: printf("MOV    L <- E"); break;
+        case 0x6c: printf("MOV    L <- H"); break;
+        case 0x6d: printf("MOV    L <- L"); break;
+        case 0x6f: printf("MOV    L <- A"); break;
+        case 0x78: printf("MOV    A <- B"); break;
+        case 0x79: printf("MOV    A <- C"); break;
+        case 0x7a: printf("MOV    A <- D"); break;
+        case 0x7b: printf("MOV    A <- E"); break;
+        case 0x7c: printf("MOV    A <- H"); break;
+        case 0x7d: printf("MOV    A <- L"); break;
+        case 0x7f: printf("MOV    A <- A"); break;
+
+        // MOV r, M
+        // MOV M, r
+
+        // MVI r, data
+        case 0x36: printf("MVI    M <- #$%02x", codeAddress[1]); opBytes=2; break;
+
+        // LXI rp, data 16
+
+        case 0x3a: printf("LDA    ($%02x%02x)", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0x32: printf("STA    ($%02x%02x)", codeAddress[2], codeAddress[1]); opBytes=3; break;
+
+        case 0x2a: printf("LHLD   ($%02x%02x)", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0x22: printf("SHLD   ($%02x%02x)", codeAddress[2], codeAddress[1]); opBytes=3; break;
+
+        // LDAX rp
+        // STAX rp
+        case 0xeb: printf("XCHG"); break;
     }
     printf("\n");
 
