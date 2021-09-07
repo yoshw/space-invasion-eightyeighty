@@ -113,8 +113,15 @@ int printDisassembledOp(unsigned char* codebuffer, int pc) {
         case 0x75: printf("MOV    (H L) <- L"); break;
         case 0x77: printf("MOV    (H L) <- A"); break;
 
-        // MVI r, data
-        case 0x36: printf("MVI    M <- #$%02x", codeAddress[1]); opBytes=2; break;
+        case 0x06: printf("MVI    B <- #$%02x", codeAddress[1]); opBytes=2; break;
+        case 0x0e: printf("MVI    C <- #$%02x", codeAddress[1]); opBytes=2; break;
+        case 0x16: printf("MVI    D <- #$%02x", codeAddress[1]); opBytes=2; break;
+        case 0x1e: printf("MVI    E <- #$%02x", codeAddress[1]); opBytes=2; break;
+        case 0x26: printf("MVI    H <- #$%02x", codeAddress[1]); opBytes=2; break;
+        case 0x2e: printf("MVI    L <- #$%02x", codeAddress[1]); opBytes=2; break;
+        case 0x3e: printf("MVI    A <- #$%02x", codeAddress[1]); opBytes=2; break;
+
+        case 0x36: printf("MVI    (H L) <- #$%02x", codeAddress[1]); opBytes=2; break;
 
         // LXI rp, data 16
 
