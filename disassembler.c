@@ -227,6 +227,17 @@ int printDisassembledOp(unsigned char* codebuffer, int pc) {
         case 0x39: printf("DAD    H-L <- H-L + SP"); break;
 
         case 0x27: printf("DAA"); break;
+
+        // Logical Group
+        case 0xa0: printf("ANA    A <- A ∧ B"); break;
+        case 0xa1: printf("ANA    A <- A ∧ C"); break;
+        case 0xa2: printf("ANA    A <- A ∧ D"); break;
+        case 0xa3: printf("ANA    A <- A ∧ E"); break;
+        case 0xa4: printf("ANA    A <- A ∧ H"); break;
+        case 0xa5: printf("ANA    A <- A ∧ L"); break;
+        case 0xa7: printf("ANA    A <- A ∧ A"); break;
+
+        case 0xa6: printf("ANA    A <- A ∧ (H-L)"); break;
     }
     printf("\n");
 
