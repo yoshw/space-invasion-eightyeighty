@@ -236,8 +236,48 @@ int printDisassembledOp(unsigned char* codebuffer, int pc) {
         case 0xa4: printf("ANA    A <- A ∧ H"); break;
         case 0xa5: printf("ANA    A <- A ∧ L"); break;
         case 0xa7: printf("ANA    A <- A ∧ A"); break;
-
         case 0xa6: printf("ANA    A <- A ∧ (H-L)"); break;
+        case 0xe6: printf("ANI    A <- A ∧ #$%02x", codeAddress[1]); opBytes=2; break;
+
+        case 0xa8: printf("XRA    A <- A ⩝ B"); break;
+        case 0xa9: printf("XRA    A <- A ⩝ C"); break;
+        case 0xaa: printf("XRA    A <- A ⩝ D"); break;
+        case 0xab: printf("XRA    A <- A ⩝ E"); break;
+        case 0xac: printf("XRA    A <- A ⩝ H"); break;
+        case 0xad: printf("XRA    A <- A ⩝ L"); break;
+        case 0xaf: printf("XRA    A <- A ⩝ A"); break;
+        case 0xae: printf("XRA    A <- A ⩝ (H-L)"); break;
+        case 0xee: printf("XRI    A <- A ⩝ #$%02x", codeAddress[1]); opBytes=2; break;
+
+        case 0xb0: printf("ORA    A <- A ∨ B"); break;
+        case 0xb1: printf("ORA    A <- A ∨ C"); break;
+        case 0xb2: printf("ORA    A <- A ∨ D"); break;
+        case 0xb3: printf("ORA    A <- A ∨ E"); break;
+        case 0xb4: printf("ORA    A <- A ∨ H"); break;
+        case 0xb5: printf("ORA    A <- A ∨ L"); break;
+        case 0xb7: printf("ORA    A <- A ∨ A"); break;
+        case 0xb6: printf("ORA    A <- A ∨ (H-L)"); break;
+        case 0xf6: printf("ORI    A <- A ∨ #$%02x", codeAddress[1]); opBytes=2; break;
+
+        case 0xb8: printf("CMP    A - B"); break;
+        case 0xb9: printf("CMP    A - C"); break;
+        case 0xba: printf("CMP    A - D"); break;
+        case 0xbb: printf("CMP    A - E"); break;
+        case 0xbc: printf("CMP    A - H"); break;
+        case 0xbd: printf("CMP    A - L"); break;
+        case 0xbf: printf("CMP    A - A"); break;
+        case 0xbe: printf("CMP    A - (H-L)"); break;
+        case 0xfe: printf("CPI    A - #$%02x", codeAddress[1]); opBytes=2; break;
+
+        case 0x07: printf("RLC"); break;
+        case 0x0f: printf("RRC"); break;
+        case 0x17: printf("RAL"); break;
+        case 0x1f: printf("RAR"); break;
+        case 0x2f: printf("CMA"); break;
+        case 0x3f: printf("CMC"); break;
+        case 0x37: printf("STC"); break;
+        
+
     }
     printf("\n");
 
