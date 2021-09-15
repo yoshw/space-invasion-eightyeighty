@@ -1,0 +1,993 @@
+0000 NOP
+0001 NOP
+0002 NOP
+0003 JMP    $18d4
+0006 NOP
+0007 NOP
+0008 PUSH   PSW
+0009 PUSH   B-C
+000a PUSH   D-E
+000b PUSH   H-L
+000c JMP    $008c
+000f NOP
+0010 PUSH   PSW
+0011 PUSH   B-C
+0012 PUSH   D-E
+0013 PUSH   H-L
+0014 MVI    A <- #$80
+0016 STA    ($2072) <- A
+0019 LXI    H-L <- #$20c0
+001c DCR    (H-L) <- (H-L) - 1
+001d CALL   $17cd
+0020 IN     $01
+0022 RRC
+0023 IF  C, JMP    $0067
+0026 LDA    A <- ($20ea)
+0029 ANA    A <- A ∧ A
+002a IF  Z, JMP    $0042
+002d LDA    A <- ($20eb)
+0030 CPI    A - #$99
+0032 IF  Z, JMP    $003e
+0035 ADI    A <- A + #$01
+0037 DAA
+0038 STA    ($20eb) <- A
+003b CALL   $1947
+003e XRA    A <- A ⩝ A
+003f STA    ($20ea) <- A
+0042 LDA    A <- ($20e9)
+0045 ANA    A <- A ∧ A
+0046 IF  Z, JMP    $0082
+0049 LDA    A <- ($20ef)
+004c ANA    A <- A ∧ A
+004d IF NZ, JMP    $006f
+0050 LDA    A <- ($20eb)
+0053 ANA    A <- A ∧ A
+0054 IF NZ, JMP    $005d
+0057 CALL   $0abf
+005a JMP    $0082
+005d LDA    A <- ($2093)
+0060 ANA    A <- A ∧ A
+0061 IF NZ, JMP    $0082
+0064 JMP    $0765
+0067 MVI    A <- #$01
+0069 STA    ($20ea) <- A
+006c JMP    $003f
+006f CALL   $1740
+0072 LDA    A <- ($2032)
+0075 STA    ($2080) <- A
+0078 CALL   $0100
+007b CALL   $0248
+007e CALL   $0913
+0081 NOP
+0082 POP    H-L
+0083 POP    D-E
+0084 POP    B-C
+0085 POP    PSW
+0086 EI
+0087 RET    $0000
+008a NOP
+008b NOP
+008c XRA    A <- A ⩝ A
+008d STA    ($2072) <- A
+0090 LDA    A <- ($20e9)
+0093 ANA    A <- A ∧ A
+0094 IF  Z, JMP    $0082
+0097 LDA    A <- ($20ef)
+009a ANA    A <- A ∧ A
+009b IF NZ, JMP    $00a5
+009e LDA    A <- ($20c1)
+00a1 RRC
+00a2 IF NC, JMP    $0082
+00a5 LXI    H-L <- #$2020
+00a8 CALL   $024b
+00ab CALL   $0141
+00ae JMP    $0082
+00b1 CALL   $0886
+00b4 PUSH   H-L
+00b5 MOV    A <- (H-L)
+00b6 INX    H-L <- H-L + 1
+00b7 MOV    H <- (H-L)
+00b8 MOV    L <- A
+00b9 SHLD   ($2009) <- L, ($200a) <- H
+00bc SHLD   ($200b) <- L, ($200c) <- H
+00bf POP    H-L
+00c0 DCX    H-L <- H-L - 1
+00c1 MOV    A <- (H-L)
+00c2 CPI    A - #$03
+00c4 IF NZ, JMP    $00c8
+00c7 DCR    A <- A - 1
+00c8 STA    ($2008) <- A
+00cb CPI    A - #$fe
+00cd MVI    A <- #$00
+00cf IF NZ, JMP    $00d3
+00d2 INR    A <- A + 1
+00d3 STA    ($200d) <- A
+00d6 RET    $023e
+00d9 STA    ($21fb) <- A
+00dc STA    ($22fb) <- A
+00df JMP    $08e4
+00e2 NOP
+00e3 NOP
+00e4 NOP
+00e5 NOP
+00e6 NOP
+00e7 NOP
+00e8 NOP
+00e9 NOP
+00ea NOP
+00eb NOP
+00ec NOP
+00ed NOP
+00ee NOP
+00ef NOP
+00f0 NOP
+00f1 NOP
+00f2 NOP
+00f3 NOP
+00f4 NOP
+00f5 NOP
+00f6 NOP
+00f7 NOP
+00f8 NOP
+00f9 NOP
+00fa NOP
+00fb NOP
+00fc NOP
+00fd NOP
+00fe NOP
+00ff NOP
+0100 LXI    H-L <- #$2002
+0103 MOV    A <- (H-L)
+0104 ANA    A <- A ∧ A
+0105 IF NZ, JMP    $1538
+0108 PUSH   H-L
+0109 LDA    A <- ($2006)
+010c MOV    L <- A
+010d LDA    A <- ($2067)
+0110 MOV    H <- A
+0111 MOV    A <- (H-L)
+0112 ANA    A <- A ∧ A
+0113 POP    H-L
+0114 IF  Z, JMP    $0136
+0117 INX    H-L <- H-L + 1
+0118 INX    H-L <- H-L + 1
+0119 MOV    A <- (H-L)
+011a INX    H-L <- H-L + 1
+011b MOV    B <- (H-L)
+011c ANI    A <- A ∧ #$fe
+011e RLC
+011f RLC
+0120 RLC
+0121 MOV    E <- A
+0122 MVI    D <- #$00
+0124 LXI    H-L <- #$1c00
+0127 DAD    H-L <- H-L + D-E
+0128 XCHG   H-L <-> D-E
+0129 MOV    A <- B
+012a ANA    A <- A ∧ A
+012b IF NZ, CALL   $013b
+012e LHLD   L <- ($200b), H <- ($200c)
+0131 MVI    B <- #$10
+0133 CALL   $15d3
+0136 XRA    A <- A ⩝ A
+0137 STA    ($2000) <- A
+013a RET    $3021
+013d NOP
+013e DAD    H-L <- H-L + D-E
+013f XCHG   H-L <-> D-E
+0140 RET    $683a
+0143 
+0144 ANA    A <- A ∧ A
+0145 IF  Z, RET    $003a
+0148 
+0149 ANA    A <- A ∧ A
+014a IF NZ, RET    $673a
+014d 
+014e MOV    H <- A
+014f LDA    A <- ($2006)
+0152 MVI    D <- #$02
+0154 INR    A <- A + 1
+0155 CPI    A - #$37
+0157 IF  Z, CALL   $01a1
+015a MOV    L <- A
+015b MOV    B <- (H-L)
+015c DCR    B <- B - 1
+015d IF NZ, JMP    $0154
+0160 STA    ($2006) <- A
+0163 CALL   $017a
+0166 MOV    H <- C
+0167 SHLD   ($200b) <- L, ($200c) <- H
+016a MOV    A <- L
+016b CPI    A - #$28
+016d IF  C, JMP    $1971
+0170 MOV    A <- D
+0171 STA    ($2004) <- A
+0174 MVI    A <- #$01
+0176 STA    ($2000) <- A
+0179 RET    $0016
+017c MOV    A <- L
+017d LXI    H-L <- #$2009
+0180 MOV    B <- (H-L)
+0181 INX    H-L <- H-L + 1
+0182 MOV    C <- (H-L)
+0183 CPI    A - #$0b
+0185 IF  M, JMP    $0194
+0188 SBI    A <- A - #$0b - CY
+018a MOV    E <- A
+018b MOV    A <- B
+018c ADI    A <- A + #$10
+018e MOV    B <- A
+018f MOV    A <- E
+0190 INR    D <- D + 1
+0191 JMP    $0183
+0194 MOV    L <- B
+0195 ANA    A <- A ∧ A
+0196 IF  Z, RET    $795f
+0199 ADI    A <- A + #$10
+019b MOV    C <- A
+019c MOV    A <- E
+019d DCR    A <- A - 1
+019e JMP    $0195
+01a1 DCR    D <- D - 1
+01a2 IF  Z, JMP    $01cd
+01a5 LXI    H-L <- #$2006
+01a8 MVI    (H-L) <- #$00
+01aa INX    H-L <- H-L + 1
+01ab MOV    C <- (H-L)
+01ac MVI    (H-L) <- #$00
+01ae CALL   $01d9
+01b1 LXI    H-L <- #$2005
+01b4 MOV    A <- (H-L)
+01b5 INR    A <- A + 1
+01b6 ANI    A <- A ∧ #$01
+01b8 MOV    (H-L) <- A
+01b9 XRA    A <- A ⩝ A
+01ba LXI    H-L <- #$2067
+01bd MOV    H <- (H-L)
+01be RET    $2100
+01c1 NOP
+01c2 LXI    H-L <- #$3706
+01c5 MVI    (H-L) <- #$01
+01c7 INX    H-L <- H-L + 1
+01c8 DCR    B <- B - 1
+01c9 IF NZ, JMP    $01c5
+01cc RET    $c9e1
+01cf MVI    A <- #$01
+01d1 MVI    B <- #$e0
+01d3 LXI    H-L <- #$2402
+01d6 JMP    $14cc
+01d9 INX    H-L <- H-L + 1
+01da MOV    B <- (H-L)
+01db INX    H-L <- H-L + 1
+01dc MOV    A <- C
+01dd ADD    A <- A + (H-L)
+01de MOV    (H-L) <- A
+01df INX    H-L <- H-L + 1
+01e0 MOV    A <- B
+01e1 ADD    A <- A + (H-L)
+01e2 MOV    (H-L) <- A
+01e3 RET    $c006
+01e6 LXI    D-E <- #$1b00
+01e9 LXI    H-L <- #$2000
+01ec JMP    $1a32
+01ef LXI    H-L <- #$2142
+01f2 JMP    $01f8
+01f5 LXI    H-L <- #$2242
+01f8 MVI    C <- #$04
+01fa LXI    D-E <- #$1d20
+01fd PUSH   D-E
+01fe MVI    B <- #$2c
+0200 CALL   $1a32
+0203 POP    D-E
+0204 DCR    C <- C - 1
+0205 IF NZ, JMP    $01fd
+0208 RET    $013e
+020b JMP    $021b
+020e MVI    A <- #$01
+0210 JMP    $0214
+0213 XRA    A <- A ⩝ A
+0214 LXI    D-E <- #$2242
+0217 JMP    $021e
+021a XRA    A <- A ⩝ A
+021b LXI    D-E <- #$2142
+021e STA    ($2081) <- A
+0221 LXI    B-C <- #$1602
+0224 LXI    H-L <- #$2806
+0227 MVI    A <- #$04
+0229 PUSH   PSW
+022a PUSH   B-C
+022b LDA    A <- ($2081)
+022e ANA    A <- A ∧ A
+022f IF NZ, JMP    $0242
+0232 CALL   $1a69
+0235 POP    B-C
+0236 POP    PSW
+0237 DCR    A <- A - 1
+0238 IF  Z, RET    $11d5
+023b IF PO, RET    $1902
+023e POP    D-E
+023f JMP    $0229
+0242 CALL   $147c
+0245 JMP    $0235
+0248 LXI    H-L <- #$2010
+024b MOV    A <- (H-L)
+024c CPI    A - #$ff
+024e IF  Z, RET    $fefe
+0251 IF  Z, JMP    $0281
+0254 INX    H-L <- H-L + 1
+0255 MOV    B <- (H-L)
+0256 MOV    C <- A
+0257 ORA    A <- A ∨ B
+0258 MOV    A <- C
+0259 IF NZ, JMP    $0277
+025c INX    H-L <- H-L + 1
+025d MOV    A <- (H-L)
+025e ANA    A <- A ∧ A
+025f IF NZ, JMP    $0288
+0262 INX    H-L <- H-L + 1
+0263 MOV    E <- (H-L)
+0264 INX    H-L <- H-L + 1
+0265 MOV    D <- (H-L)
+0266 PUSH   H-L
+0267 XCHG   H-L <-> D-E
+0268 PUSH   H-L
+0269 LXI    H-L <- #$026f
+026c XTHL
+026d PUSH   D-E
+026e PCHL
+026f POP    H-L
+0270 LXI    D-E <- #$000c
+0273 DAD    H-L <- H-L + D-E
+0274 JMP    $024b
+0277 DCR    B <- B - 1
+0278 INR    B <- B + 1
+0279 IF NZ, JMP    $027d
+027c DCR    A <- A - 1
+027d DCR    B <- B - 1
+027e MOV    (H-L) <- B
+027f DCX    H-L <- H-L - 1
+0280 MOV    (H-L) <- A
+0281 LXI    D-E <- #$0010
+0284 DAD    H-L <- H-L + D-E
+0285 JMP    $024b
+0288 DCR    (H-L) <- (H-L) - 1
+0289 DCX    H-L <- H-L - 1
+028a DCX    H-L <- H-L - 1
+028b JMP    $0281
+028e POP    H-L
+028f INX    H-L <- H-L + 1
+0290 MOV    A <- (H-L)
+0291 CPI    A - #$ff
+0293 IF  Z, JMP    $033b
+0296 INX    H-L <- H-L + 1
+0297 DCR    (H-L) <- (H-L) - 1
+0298 IF NZ, RET    $af47
+029b STA    ($2068) <- A
+029e STA    ($2069) <- A
+02a1 MVI    A <- #$30
+02a3 STA    ($206a) <- A
+02a6 MOV    A <- B
+02a7 MVI    (H-L) <- #$05
+02a9 INX    H-L <- H-L + 1
+02aa DCR    (H-L) <- (H-L) - 1
+02ab IF NZ, JMP    $039b
+02ae LHLD   L <- ($201a), H <- ($201b)
+02b1 MVI    B <- #$10
+02b3 CALL   $1424
+02b6 LXI    H-L <- #$2010
+02b9 LXI    D-E <- #$1b10
+02bc MVI    B <- #$10
+02be CALL   $1a32
+02c1 MVI    B <- #$00
+02c3 CALL   $19dc
+02c6 LDA    A <- ($206d)
+02c9 ANA    A <- A ∧ A
+02ca IF NZ, RET    $ef3a
+02cd 
+02ce ANA    A <- A ∧ A
+02cf IF  Z, RET    $0031
+02d2 INR    H <- H + 1
+02d3 EI
+02d4 CALL   $19d7
+02d7 CALL   $092e
+02da ANA    A <- A ∧ A
+02db IF  Z, JMP    $166d
+02de CALL   $18e7
+02e1 MOV    A <- (H-L)
+02e2 ANA    A <- A ∧ A
+02e3 IF  Z, JMP    $032c
+02e6 LDA    A <- ($20ce)
+02e9 ANA    A <- A ∧ A
+02ea IF  Z, JMP    $032c
+02ed LDA    A <- ($2067)
+02f0 PUSH   PSW
+02f1 RRC
+02f2 IF  C, JMP    $0332
+02f5 CALL   $020e
+02f8 CALL   $0878
+02fb MOV    (H-L) <- E
+02fc INX    H-L <- H-L + 1
+02fd MOV    (H-L) <- D
+02fe DCX    H-L <- H-L - 1
+02ff DCX    H-L <- H-L - 1
+0300 MOV    (H-L) <- B
+0301 NOP
+0302 CALL   $01e4
+0305 POP    PSW
+0306 RRC
+0307 MVI    A <- #$21
+0309 MVI    B <- #$00
+030b IF NC, JMP    $0312
+030e MVI    B <- #$20
+0310 MVI    A <- #$22
+0312 STA    ($2067) <- A
+0315 CALL   $0ab6
+0318 XRA    A <- A ⩝ A
+0319 STA    ($2011) <- A
+031c MOV    A <- B
+031d OUT    $05
+031f INR    A <- A + 1
+0320 STA    ($2098) <- A
+0323 CALL   $09d6
+0326 CALL   $1a7f
+0329 JMP    $07f9
+032c CALL   $1a7f
+032f JMP    $0817
+0332 CALL   $0209
+0335 JMP    $02f8
+0338 NOP
+0339 NOP
+033a NOP
+033b LXI    H-L <- #$2068
+033e MVI    (H-L) <- #$01
+0340 INX    H-L <- H-L + 1
+0341 MOV    A <- (H-L)
+0342 ANA    A <- A ∧ A
+0343 JMP    $03b0
+0346 NOP
+0347 DCX    H-L <- H-L - 1
+0348 MVI    (H-L) <- #$01
+034a LDA    A <- ($201b)
+034d MOV    B <- A
+034e LDA    A <- ($20ef)
+0351 ANA    A <- A ∧ A
+0352 IF NZ, JMP    $0363
+0355 LDA    A <- ($201d)
+0358 RRC
+0359 IF  C, JMP    $0381
+035c RRC
+035d IF  C, JMP    $038e
+0360 JMP    $036f
+0363 CALL   $17c0
+0366 RLC
+0367 RLC
+0368 IF  C, JMP    $0381
+036b RLC
+036c IF  C, JMP    $038e
+036f LXI    H-L <- #$2018
+0372 CALL   $1a3b
+0375 CALL   $1a47
+0378 CALL   $1439
+037b MVI    A <- #$00
+037d STA    ($2012) <- A
+0380 RET    $fe78
+0383 
+0384 IF  Z, JMP    $036f
+0387 INR    A <- A + 1
+0388 STA    ($201b) <- A
+038b JMP    $036f
+038e MOV    A <- B
+038f CPI    A - #$30
+0391 IF  Z, JMP    $036f
+0394 DCR    A <- A - 1
+0395 STA    ($201b) <- A
+0398 JMP    $036f
+039b INR    A <- A + 1
+039c ANI    A <- A ∧ #$01
+039e STA    ($2015) <- A
+03a1 RLC
+03a2 RLC
+03a3 RLC
+03a4 RLC
+03a5 LXI    H-L <- #$1c70
+03a8 ADD    A <- A + L
+03a9 MOV    L <- A
+03aa SHLD   ($2018) <- L, ($2019) <- H
+03ad JMP    $036f
+03b0 IF NZ, JMP    $034a
+03b3 INX    H-L <- H-L + 1
+03b4 DCR    (H-L) <- (H-L) - 1
+03b5 IF NZ, JMP    $034a
+03b8 JMP    $0346
+03bb LXI    D-E <- #$202a
+03be CALL   $1a06
+03c1 POP    H-L
+03c2 IF NC, RET    $7e23
+03c5 ANA    A <- A ∧ A
+03c6 IF  Z, RET    $01fe
+03c9 IF  Z, JMP    $03fa
+03cc CPI    A - #$02
+03ce IF  Z, JMP    $040a
+03d1 INX    H-L <- H-L + 1
+03d2 CPI    A - #$03
+03d4 IF NZ, JMP    $042a
+03d7 DCR    (H-L) <- (H-L) - 1
+03d8 IF  Z, JMP    $0436
+03db MOV    A <- (H-L)
+03dc CPI    A - #$0f
+03de IF NZ, RET    $cde5
+03e1 
+03e2 INR    B <- B + 1
+03e3 CALL   $1452
+03e6 POP    H-L
+03e7 INX    H-L <- H-L + 1
+03e8 INR    (H-L) <- (H-L) + 1
+03e9 INX    H-L <- H-L + 1
+03ea INX    H-L <- H-L + 1
+03eb DCR    (H-L) <- (H-L) - 1
+03ec DCR    (H-L) <- (H-L) - 1
+03ed INX    H-L <- H-L + 1
+03ee DCR    (H-L) <- (H-L) - 1
+03ef DCR    (H-L) <- (H-L) - 1
+03f0 DCR    (H-L) <- (H-L) - 1
+03f1 INX    H-L <- H-L + 1
+03f2 MVI    (H-L) <- #$08
+03f4 CALL   $0430
+03f7 JMP    $1400
+03fa INR    A <- A + 1
+03fb MOV    (H-L) <- A
+03fc LDA    A <- ($201b)
+03ff ADI    A <- A + #$08
+0401 STA    ($202a) <- A
+0404 CALL   $0430
+0407 JMP    $1400
+040a CALL   $0430
+040d PUSH   D-E
+040e PUSH   H-L
+040f PUSH   B-C
+0410 CALL   $1452
+0413 POP    B-C
+0414 POP    H-L
+0415 POP    D-E
+0416 LDA    A <- ($202c)
+0419 ADD    A <- A + L
+041a MOV    L <- A
+041b STA    ($2029) <- A
+041e CALL   $1491
+0421 LDA    A <- ($2061)
+0424 ANA    A <- A ∧ A
+0425 IF  Z, RET    $0232
+0428 
+0429 RET    $05fe
+042c IF  Z, RET    $36c3
+042f INR    B <- B + 1
+0430 LXI    H-L <- #$2027
+0433 JMP    $1a3b
+0436 CALL   $0430
+0439 CALL   $1452
+043c LXI    H-L <- #$2025
+043f LXI    D-E <- #$1b25
+0442 MVI    B <- #$07
+0444 CALL   $1a32
+0447 LHLD   L <- ($208d), H <- ($208e)
+044a INR    L <- L + 1
+044b MOV    A <- L
+044c CPI    A - #$63
+044e IF  C, JMP    $0453
+0451 MVI    L <- #$54
+0453 SHLD   ($208d) <- L, ($208e) <- H
+0456 LHLD   L <- ($208f), H <- ($2090)
+0459 INR    L <- L + 1
+045a SHLD   ($208f) <- L, ($2090) <- H
+045d LDA    A <- ($2084)
+0460 ANA    A <- A ∧ A
+0461 IF NZ, RET    $e67e
+0464 LXI    B-C <- #$2901
+0467 STAX   (B-C) <- A
+0468 IF NZ, JMP    $046e
+046b LXI    B-C <- #$fee0
+046e LXI    H-L <- #$208a
+0471 MOV    (H-L) <- C
+0472 INX    H-L <- H-L + 1
+0473 INX    H-L <- H-L + 1
+0474 MOV    (H-L) <- B
+0475 RET    $3ae1
+0478 STA    ($321b) <- A
+047b STA    ($2a20) <- A
+047e 
+047f 
+0480 MOV    A <- L
+0481 ORA    A <- A ∨ H
+0482 IF NZ, JMP    $048a
+0485 DCX    H-L <- H-L - 1
+0486 SHLD   ($2038) <- L, ($2039) <- H
+0489 RET    $3511
+048c 
+048d MVI    A <- #$f9
+048f CALL   $0550
+0492 LDA    A <- ($2046)
+0495 STA    ($2070) <- A
+0498 LDA    A <- ($2056)
+049b STA    ($2071) <- A
+049e CALL   $0563
+04a1 LDA    A <- ($2078)
+04a4 ANA    A <- A ∧ A
+04a5 LXI    H-L <- #$2035
+04a8 IF NZ, JMP    $055b
+04ab LXI    D-E <- #$1b30
+04ae LXI    H-L <- #$2030
+04b1 MVI    B <- #$10
+04b3 JMP    $1a32
+04b6 POP    H-L
+04b7 LDA    A <- ($206e)
+04ba ANA    A <- A ∧ A
+04bb IF NZ, RET    $803a
+04be 
+04bf CPI    A - #$01
+04c1 IF NZ, RET    $4511
+04c4 
+04c5 MVI    A <- #$ed
+04c7 CALL   $0550
+04ca LDA    A <- ($2036)
+04cd STA    ($2070) <- A
+04d0 LDA    A <- ($2056)
+04d3 STA    ($2071) <- A
+04d6 CALL   $0563
+04d9 LDA    A <- ($2076)
+04dc CPI    A - #$10
+04de IF  C, JMP    $04e7
+04e1 LDA    A <- ($1b48)
+04e4 STA    ($2076) <- A
+04e7 LDA    A <- ($2078)
+04ea ANA    A <- A ∧ A
+04eb LXI    H-L <- #$2045
+04ee IF NZ, JMP    $055b
+04f1 LXI    D-E <- #$1b40
+04f4 LXI    H-L <- #$2040
+04f7 MVI    B <- #$10
+04f9 CALL   $1a32
+04fc LDA    A <- ($2082)
+04ff DCR    A <- A - 1
+0500 IF NZ, JMP    $0508
+0503 MVI    A <- #$01
+0505 STA    ($206e) <- A
+0508 LHLD   L <- ($2076), H <- ($2077)
+050b JMP    $067e
+050e POP    H-L
+050f LXI    D-E <- #$2055
+0512 MVI    A <- #$db
+0514 CALL   $0550
+0517 LDA    A <- ($2046)
+051a STA    ($2070) <- A
+051d LDA    A <- ($2036)
+0520 STA    ($2071) <- A
+0523 CALL   $0563
+0526 LDA    A <- ($2076)
+0529 CPI    A - #$15
+052b IF  C, JMP    $0534
+052e LDA    A <- ($1b58)
+0531 STA    ($2076) <- A
+0534 LDA    A <- ($2078)
+0537 ANA    A <- A ∧ A
+0538 LXI    H-L <- #$2055
+053b IF NZ, JMP    $055b
+053e LXI    D-E <- #$1b50
+0541 LXI    H-L <- #$2050
+0544 MVI    B <- #$10
+0546 CALL   $1a32
+0549 LHLD   L <- ($2076), H <- ($2077)
+054c SHLD   ($2058) <- L, ($2059) <- H
+054f RET    $7f32
+0552 
+0553 LXI    H-L <- #$2073
+0556 MVI    B <- #$0b
+0558 JMP    $1a32
+055b LXI    D-E <- #$2073
+055e MVI    B <- #$0b
+0560 JMP    $1a32
+0563 LXI    H-L <- #$2073
+0566 MOV    A <- (H-L)
+0567 ANI    A <- A ∧ #$80
+0569 IF NZ, JMP    $05c1
+056c LDA    A <- ($20c1)
+056f CPI    A - #$04
+0571 LDA    A <- ($2069)
+0574 IF  Z, JMP    $05b7
+0577 ANA    A <- A ∧ A
+0578 IF  Z, RET    $3623
+057b NOP
+057c LDA    A <- ($2070)
+057f ANA    A <- A ∧ A
+0580 IF  Z, JMP    $0589
+0583 MOV    B <- A
+0584 LDA    A <- ($20cf)
+0587 CMP    A - B
+0588 IF NC, RET    $713a
+058b 
+058c ANA    A <- A ∧ A
+058d IF  Z, JMP    $0596
+0590 MOV    B <- A
+0591 LDA    A <- ($20cf)
+0594 CMP    A - B
+0595 IF NC, RET    $7e23
+0598 ANA    A <- A ∧ A
+0599 IF  Z, JMP    $061b
+059c LHLD   L <- ($2076), H <- ($2077)
+059f MOV    C <- (H-L)
+05a0 INX    H-L <- H-L + 1
+05a1 NOP
+05a2 SHLD   ($2076) <- L, ($2077) <- H
+05a5 CALL   $062f
+05a8 IF NC, RET    $7acd
+05ab LXI    B-C <- #$c679
+05ae RLC
+05af MOV    H <- A
+05b0 MOV    A <- L
+05b1 SUI    A <- A - #$0a
+05b3 MOV    L <- A
+05b4 SHLD   ($207b) <- L, ($207c) <- H
+05b7 LXI    H-L <- #$2073
+05ba MOV    A <- (H-L)
+05bb ORI    A <- A ∨ #$80
+05bd MOV    (H-L) <- A
+05be INX    H-L <- H-L + 1
+05bf INR    (H-L) <- (H-L) + 1
+05c0 RET    $7c11
+05c3 
+05c4 CALL   $1a06
+05c7 IF NC, RET    $7e23
+05ca ANI    A <- A ∧ #$01
+05cc IF NZ, JMP    $0644
+05cf INX    H-L <- H-L + 1
+05d0 INR    (H-L) <- (H-L) + 1
+05d1 CALL   $0675
+05d4 LDA    A <- ($2079)
+05d7 ADI    A <- A + #$03
+05d9 LXI    H-L <- #$207f
+05dc CMP    A - (H-L)
+05dd IF  C, JMP    $05e2
+05e0 SUI    A <- A - #$0c
+05e2 STA    ($2079) <- A
+05e5 LDA    A <- ($207b)
+05e8 MOV    B <- A
+05e9 LDA    A <- ($207e)
+05ec ADD    A <- A + B
+05ed STA    ($207b) <- A
+05f0 CALL   $066c
+05f3 LDA    A <- ($207b)
+05f6 CPI    A - #$15
+05f8 IF  C, JMP    $0612
+05fb LDA    A <- ($2061)
+05fe ANA    A <- A ∧ A
+05ff IF  Z, RET    $7b3a
+0602 
+0603 CPI    A - #$1e
+0605 IF  C, JMP    $0612
+0608 CPI    A - #$27
+060a NOP
+060b IF NC, JMP    $0612
+060e SUB    A <- A - A
+060f STA    ($2015) <- A
+0612 LDA    A <- ($2073)
+0615 ORI    A <- A ∨ #$01
+0617 STA    ($2073) <- A
+061a RET    $1b3a
+061d 
+061e ADI    A <- A + #$08
+0620 MOV    H <- A
+0621 CALL   $156f
+0624 MOV    A <- C
+0625 CPI    A - #$0c
+0627 IF  C, JMP    $05a5
+062a MVI    C <- #$0b
+062c JMP    $05a5
+062f DCR    C <- C - 1
+0630 LDA    A <- ($2067)
+0633 MOV    H <- A
+0634 MOV    L <- C
+0635 MVI    D <- #$05
+0637 MOV    A <- (H-L)
+0638 ANA    A <- A ∧ A
+0639 STC
+063a IF NZ, RET    $c67d
+063d DCX    B-C <- B-C - 1
+063e MOV    L <- A
+063f DCR    D <- D - 1
+0640 IF NZ, JMP    $0637
+0643 RET    $7821
+0646 
+0647 DCR    (H-L) <- (H-L) - 1
+0648 MOV    A <- (H-L)
+0649 CPI    A - #$03
+064b IF NZ, JMP    $0667
+064e CALL   $0675
+0651 LXI    H-L <- #$1cdc
+0654 SHLD   ($2079) <- L, ($207a) <- H
+0657 LXI    H-L <- #$207c
+065a DCR    (H-L) <- (H-L) - 1
+065b DCR    (H-L) <- (H-L) - 1
+065c DCX    H-L <- H-L - 1
+065d DCR    (H-L) <- (H-L) - 1
+065e DCR    (H-L) <- (H-L) - 1
+065f MVI    A <- #$06
+0661 STA    ($207d) <- A
+0664 JMP    $066c
+0667 ANA    A <- A ∧ A
+0668 IF NZ, RET    $75c3
+066b MVI    B <- #$21
+066d MOV    A <- C
+066e 
+066f CALL   $1a3b
+0672 JMP    $1491
+0675 LXI    H-L <- #$2079
+0678 CALL   $1a3b
+067b JMP    $1452
+067e SHLD   ($2048) <- L, ($2049) <- H
+0681 RET    $3ae1
+0684 ADD    A <- A + B
+0685 
+0686 CPI    A - #$02
+0688 IF NZ, RET    $8321
+068b 
+068c MOV    A <- (H-L)
+068d ANA    A <- A ∧ A
+068e IF  Z, JMP    $050f
+0691 LDA    A <- ($2056)
+0694 ANA    A <- A ∧ A
+0695 IF NZ, JMP    $050f
+0698 INX    H-L <- H-L + 1
+0699 MOV    A <- (H-L)
+069a ANA    A <- A ∧ A
+069b IF NZ, JMP    $06ab
+069e LDA    A <- ($2082)
+06a1 CPI    A - #$08
+06a3 IF  C, JMP    $050f
+06a6 MVI    (H-L) <- #$01
+06a8 CALL   $073c
+06ab LXI    D-E <- #$208a
+06ae CALL   $1a06
+06b1 IF NC, RET    $8521
+06b4 
+06b5 MOV    A <- (H-L)
+06b6 ANA    A <- A ∧ A
+06b7 IF NZ, JMP    $06d6
+06ba LXI    H-L <- #$208a
+06bd MOV    A <- (H-L)
+06be INX    H-L <- H-L + 1
+06bf INX    H-L <- H-L + 1
+06c0 ADD    A <- A + (H-L)
+06c1 STA    ($208a) <- A
+06c4 CALL   $073c
+06c7 LXI    H-L <- #$208a
+06ca MOV    A <- (H-L)
+06cb CPI    A - #$28
+06cd IF  C, JMP    $06f9
+06d0 CPI    A - #$e1
+06d2 IF NC, JMP    $06f9
+06d5 RET    $fe06
+06d8 CALL   $19dc
+06db INX    H-L <- H-L + 1
+06dc DCR    (H-L) <- (H-L) - 1
+06dd MOV    A <- (H-L)
+06de CPI    A - #$1f
+06e0 IF  Z, JMP    $074b
+06e3 CPI    A - #$18
+06e5 IF  Z, JMP    $070c
+06e8 ANA    A <- A ∧ A
+06e9 IF NZ, RET    $ef06
+06ec LXI    H-L <- #$2098
+06ef MOV    A <- (H-L)
+06f0 ANA    A <- A ∧ B
+06f1 MOV    (H-L) <- A
+06f2 ANI    A <- A ∧ #$20
+06f4 OUT    $05
+06f6 NOP
+06f7 NOP
+06f8 NOP
+06f9 CALL   $0742
+06fc CALL   $14cb
+06ff LXI    H-L <- #$2083
+0702 MVI    B <- #$0a
+0704 CALL   $075f
+0707 MVI    B <- #$fe
+0709 JMP    $19dc
+070c MVI    A <- #$01
+070e STA    ($20f1) <- A
+0711 LHLD   L <- ($208d), H <- ($208e)
+0714 MOV    B <- (H-L)
+0715 MVI    C <- #$04
+0717 LXI    H-L <- #$1d50
+071a LXI    D-E <- #$1d4c
+071d LDAX   A <- (D-E) 
+071e CMP    A - B
+071f IF  Z, JMP    $0728
+0722 INX    H-L <- H-L + 1
+0723 INX    D-E <- D-E + 1
+0724 DCR    C <- C - 1
+0725 IF NZ, JMP    $071d
+0728 MOV    A <- (H-L)
+0729 STA    ($2087) <- A
+072c MVI    H <- #$00
+072e MOV    L <- B
+072f DAD    H-L <- H-L + H-L
+0730 DAD    H-L <- H-L + H-L
+0731 DAD    H-L <- H-L + H-L
+0732 DAD    H-L <- H-L + H-L
+0733 SHLD   ($20f2) <- L, ($20f3) <- H
+0736 CALL   $0742
+0739 JMP    $08f1
+073c CALL   $0742
+073f JMP    $1439
+0742 LXI    H-L <- #$2087
+0745 CALL   $1a3b
+0748 JMP    $1a47
+074b MVI    B <- #$10
+074d LXI    H-L <- #$2098
+0750 MOV    A <- (H-L)
+0751 ORA    A <- A ∨ B
+0752 MOV    (H-L) <- A
+0753 CALL   $1770
+0756 LXI    H-L <- #$1d7c
+0759 SHLD   ($2087) <- L, ($2088) <- H
+075c JMP    $073c
+075f LXI    D-E <- #$1b83
+0762 JMP    $1a32
+0765 MVI    A <- #$01
+0767 STA    ($2093) <- A
+076a LXI    SP <- #$2400
+076d EI
+076e CALL   $1979
+0771 CALL   $09d6
+0774 LXI    H-L <- #$3013
+0777 LXI    D-E <- #$1ff3
+077a MVI    C <- #$04
+077c CALL   $08f3
+077f LDA    A <- ($20eb)
+0782 DCR    A <- A - 1
+0783 LXI    H-L <- #$2810
+0786 MVI    C <- #$14
+0788 IF NZ, JMP    $0857
+078b LXI    D-E <- #$1acf
+078e CALL   $08f3
+0791 IN     $01
+0793 ANI    A <- A ∧ #$04
+0795 IF  Z, JMP    $077f
+0798 MVI    B <- #$99
+079a XRA    A <- A ⩝ A
+079b STA    ($20ce) <- A
+079e LDA    A <- ($20eb)
+07a1 ADD    A <- A + B
+07a2 DAA
+07a3 STA    ($20eb) <- A
+07a6 CALL   $1947
+07a9 LXI    H-L <- #$0000
+07ac SHLD   ($20f8) <- L, ($20f9) <- H
+07af SHLD   ($20fc) <- L, ($20fd) <- H
+07b2 CALL   $1925
+07b5 CALL   $192b
+07b8 CALL   $19d7
+07bb LXI    H-L <- #$0101
+07be MOV    A <- H
+07bf STA    ($20ef) <- A
+07c2 SHLD   ($20e7) <- L, ($20e8) <- H
+07c5 SHLD   ($20e5) <- L, ($20e6) <- H
+07c8 CALL   $1956
+07cb CALL   $01ef
+07ce CALL   $01f5
+07d1 CALL   $08d1
+07d4 STA    ($21ff) <- A
+07d7 STA    ($22ff) <- A
+07da CALL   $00d7
+07dd XRA    A <- A ⩝ A
+07de STA    ($21fe) <- A
+07e1 STA    ($22fe) <- A
+07e4 CALL   $01c0
+07e7 CALL   $1904
+07ea LXI    H-L <- #$3878
+07ed SHLD   ($21fc) <- L, ($21fd) <- H
+07f0 SHLD   ($22fc) <- L, ($22fd) <- H
+07f3 CALL   $01e4
+07f6 CALL   $1a7f
+07f9 CALL   $088d
+07fc CALL   $09d6
+07ff NOP
