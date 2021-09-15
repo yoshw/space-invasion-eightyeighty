@@ -332,8 +332,8 @@ int printDisassembledOp(unsigned char* codebuffer, int pc) {
         case 0xe3: printf("XTHL"); break;
         case 0xf9: printf("SPHL"); break;
 
-        case 0xdb: printf("IN     $%02x", codeAddress[1]); opBytes=2; break;
-        case 0xd3: printf("OUT    $%02x", codeAddress[1]); opBytes=2; break;
+        case 0xdb: printf("IN     #$%02x", codeAddress[1]); opBytes=2; break;
+        case 0xd3: printf("OUT    #$%02x", codeAddress[1]); opBytes=2; break;
 
         case 0xfb: printf("EI"); break;
         case 0xf3: printf("DI"); break;
