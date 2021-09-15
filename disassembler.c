@@ -44,8 +44,6 @@ int printDisassembledOp(unsigned char* codebuffer, int pc) {
 
     printf("%04x ", pc);
     switch(*codeAddress) {
-        case 0x00: printf("NOP"); break;
-
         // Data Transfer Group
         case 0x40: printf("MOV    B <- B"); break;
         case 0x41: printf("MOV    B <- C"); break;
@@ -277,7 +275,70 @@ int printDisassembledOp(unsigned char* codebuffer, int pc) {
         case 0x3f: printf("CMC"); break;
         case 0x37: printf("STC"); break;
         
+        // Branch group
+        case 0xc3: printf("JMP    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xc2: printf("IF NZ, JMP    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xca: printf("IF  Z, JMP    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xd2: printf("IF NC, JMP    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xda: printf("IF  C, JMP    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xe2: printf("IF PO, JMP    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xea: printf("IF PE, JMP    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xf2: printf("IF  P, JMP    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xfa: printf("IF  M, JMP    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
 
+        case 0xcd: printf("CALL   $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xc4: printf("IF NZ, CALL   $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xcc: printf("IF  Z, CALL   $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xd4: printf("IF NC, CALL   $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xdc: printf("IF  C, CALL   $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xe4: printf("IF PO, CALL   $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xec: printf("IF PE, CALL   $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xf4: printf("IF  P, CALL   $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xfc: printf("IF  M, CALL   $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+
+        case 0xc9: printf("RET    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xc0: printf("IF NZ, RET    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xc8: printf("IF  Z, RET    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xd0: printf("IF NC, RET    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xd8: printf("IF  C, RET    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xe0: printf("IF PO, RET    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xe8: printf("IF PE, RET    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xf0: printf("IF  P, RET    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xf8: printf("IF  M, RET    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+
+        case 0xc7: printf("RST    0 (PC <- 00)"); break;
+        case 0xcf: printf("RST    1 (PC <- 08)"); break;
+        case 0xd7: printf("RST    2 (PC <- 10)"); break;
+        case 0xdf: printf("RST    3 (PC <- 18)"); break;
+        case 0xe7: printf("RST    4 (PC <- 20)"); break;
+        case 0xef: printf("RST    5 (PC <- 28)"); break;
+        case 0xf7: printf("RST    6 (PC <- 30)"); break;
+        case 0xff: printf("RST    7 (PC <- 38)"); break;
+
+        case 0xe9: printf("PCHL"); break;
+
+        // Stack, I/O, and Machine Control group
+
+        case 0xc5: printf("PUSH   B-C"); break;
+        case 0xd5: printf("PUSH   D-E"); break;
+        case 0xe5: printf("PUSH   H-L"); break;
+        case 0xf5: printf("PUSH   PSW"); break;
+
+        case 0xc1: printf("POP    B-C"); break;
+        case 0xd1: printf("POP    D-E"); break;
+        case 0xe1: printf("POP    H-L"); break;
+        case 0xf1: printf("POP    PSW"); break;
+
+        case 0xe3: printf("XTHL"); break;
+        case 0xf9: printf("SPHL"); break;
+
+        case 0xdb: printf("IN     $%02x", codeAddress[1]); opBytes=2; break;
+        case 0xd3: printf("OUT    $%02x", codeAddress[1]); opBytes=2; break;
+
+        case 0xfb: printf("EI"); break;
+        case 0xf3: printf("DI"); break;
+        case 0x76: printf("HLT"); break;
+        case 0x00: printf("NOP"); break;
     }
     printf("\n");
 
