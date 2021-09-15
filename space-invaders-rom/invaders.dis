@@ -1,15 +1,18 @@
+; interrupt 0 (startup)
 0000 NOP
 0001 NOP
 0002 NOP
 0003 JMP    $18d4
 0006 NOP
 0007 NOP
+; interrupt 1
 0008 PUSH   PSW
 0009 PUSH   B-C
 000a PUSH   D-E
 000b PUSH   H-L
 000c JMP    $008c
 000f NOP
+; interrupt 2
 0010 PUSH   PSW
 0011 PUSH   B-C
 0012 PUSH   D-E
@@ -67,7 +70,7 @@
 0087 RET    $0000
 008a NOP
 008b NOP
-008c XRA    A <- A ⩝ A
+008c XRA    A <- A ⩝ A    ; interrupt 1 continued. zero out A?
 008d STA    ($2072) <- A
 0090 LDA    A <- ($20e9)
 0093 ANA    A <- A ∧ A
