@@ -72,7 +72,8 @@
 0089 NOP
 008a NOP
 008b NOP
-008c XRA    A <- A ⩝ A    ; interrupt 1 continued. zero out A?
+; interrupt 1 continued. zero out A?
+008c XRA    A <- A ⩝ A
 008d STA    ($2072) <- A
 0090 LDA    A <- ($20e9)
 0093 ANA    A <- A ∧ A
@@ -280,9 +281,13 @@
 01e2 MOV    (H-L) <- A
 01e3 RET
 01e4 MVI    B <- #$c0
-01e6 LXI    D-E <- #$1b00               ; beginning of subroutine (called at start of program)
-01e9 LXI    H-L <- #$2000               ; D set to 1b00, H set to 2000 (beginning of RAM)
-01ec JMP    $1a32                       ; jumping ...
+;;; beginning of "subroutine" of sorts (called once at start of program)
+;;; D set to 1b00, H set to 2000 (beginning of RAM)
+;;; copy 256 bytes from 1b00 to 2000, returning to where we were called from, 18dc (since this is a JMP and not a CALL)
+01e6 LXI    D-E <- #$1b00
+01e9 LXI    H-L <- #$2000
+01ec JMP    $1a32
+;;;
 01ef LXI    H-L <- #$2142
 01f2 JMP    $01f8
 01f5 LXI    H-L <- #$2242
@@ -4216,9 +4221,14 @@
 18cd NOP
 18ce CALL   $08ff
 18d1 JMP    $0ab6
-18d4 LXI    SP <- #$2400                ; real start of program. init stack to 2400
-18d7 MVI    B <- #$00                   ; B contains 00
-18d9 CALL   $01e6                       ; call 01e6 ...
+
+; real start of program. init stack to 2400
+18d4 LXI    SP <- #$2400
+; init B to 00
+18d7 MVI    B <- #$00                   
+; call 01e6 - copies 256 bytes from 1b00 into RAM at 2000, then returns here
+18d9 CALL   $01e6                       
+; call 1956 - 
 18dc CALL   $1956
 18df MVI    A <- #$08
 18e1 STA    ($20cf) <- A
@@ -4276,6 +4286,8 @@
 194d JMP    $09b2
 1950 LXI    H-L <- #$20f4
 1953 JMP    $1931
+;; beginning of subroutine
+; call 1a5c - zero out 2400 to 3fff
 1956 CALL   $1a5c
 1959 CALL   $191a
 195c CALL   $1925
@@ -4394,13 +4406,20 @@
 1a2f RLC
 1a30 DCR    B <- B - 1
 1a31 RST    7 (PC <- 38)
-1a32 LDAX   A <- (D-E)                  ; important subroutine - called/jumped to from many places
-1a33 MOV    (H-L) <- A                  ; memory contents of D-E are moved to memory location in H, via A
-1a34 INX    H-L <- H-L + 1              ; H ('dest') incremented
-1a35 INX    D-E <- D-E + 1              ; D ('src') incremented
-1a36 DCR    B <- B - 1                  ; B (?) decremented
-1a37 JNZ    $1a32                       ; while B > 0, go back to 1a32
+;;; "copy region" subroutine. preconditions: H = dest addr, D = src addr, B = len
+; byte at (D) is moved to (H), via A (anything previously in A would be lost)
+1a32 LDAX   A <- (D-E)
+1a33 MOV    (H-L) <- A
+; H ('dest') incremented
+1a34 INX    H-L <- H-L + 1
+; D ('src') incremented
+1a35 INX    D-E <- D-E + 1
+; B ('len') decremented
+; while B != 0, go back to 1a32
+1a36 DCR    B <- B - 1
+1a37 JNZ    $1a32
 1a3a RET
+;;;
 1a3b MOV    E <- (H-L)
 1a3c INX    H-L <- H-L + 1
 1a3d MOV    D <- (H-L)
@@ -4429,13 +4448,20 @@
 1a59 MOV    H <- A
 1a5a POP    B-C
 1a5b RET
+;;; subroutine - zero out 2400 to 3fff
+; store 0 in memory region just above stack
 1a5c LXI    H-L <- #$2400
 1a5f MVI    (H-L) <- #$00
+; increment H
 1a61 INX    H-L <- H-L + 1
+; high order bits of addr go into A
 1a62 MOV    A <- H
+; compare high order bits to 40
+; if H is still less than 40 (started at 24), repeat
 1a63 CPI    A - #$40
 1a65 JNZ    $1a5f
 1a68 RET
+;;;
 1a69 PUSH   B-C
 1a6a PUSH   H-L
 1a6b LDAX   A <- (D-E) 
@@ -4544,6 +4570,8 @@
 1afd INR    E <- E + 1
 1afe DCR    H <- H - 1
 1aff MVI    H <- #$01
+;;; note - 1b00 to 1bff gets copied to beginning of RAM at start of program
+;;; must be some misalignment here since 1b00 is supposedly consumed by previous op
 1b01 NOP
 1b02 NOP
 1b03 
@@ -4762,6 +4790,7 @@
 1bfd NOP
 1bfe INR    E <- E + 1
 1bff DAD    H-L <- H-L + SP
+;;;
 1c00 NOP
 1c01 NOP
 1c02 DAD    H-L <- H-L + SP
