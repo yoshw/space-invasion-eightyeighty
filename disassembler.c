@@ -277,34 +277,34 @@ int printDisassembledOp(unsigned char* codebuffer, int pc) {
         
         // Branch group
         case 0xc3: printf("JMP    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xc2: printf("IF NZ, JMP    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xca: printf("IF  Z, JMP    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xd2: printf("IF NC, JMP    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xda: printf("IF  C, JMP    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xe2: printf("IF PO, JMP    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xea: printf("IF PE, JMP    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xf2: printf("IF  P, JMP    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xfa: printf("IF  M, JMP    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xc2: printf("JNZ    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xca: printf("JZ     $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xd2: printf("JNC    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xda: printf("JC     $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xe2: printf("JPO    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xea: printf("JPE    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xf2: printf("JP     $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xfa: printf("JM     $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
 
         case 0xcd: printf("CALL   $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xc4: printf("IF NZ, CALL   $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xcc: printf("IF  Z, CALL   $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xd4: printf("IF NC, CALL   $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xdc: printf("IF  C, CALL   $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xe4: printf("IF PO, CALL   $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xec: printf("IF PE, CALL   $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xf4: printf("IF  P, CALL   $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xfc: printf("IF  M, CALL   $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xc4: printf("CNZ    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xcc: printf("CZ     $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xd4: printf("CNC    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xdc: printf("CC     $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xe4: printf("CPO    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xec: printf("CPE    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xf4: printf("CP     $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xfc: printf("CM     $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
 
         case 0xc9: printf("RET    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xc0: printf("IF NZ, RET    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xc8: printf("IF  Z, RET    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xd0: printf("IF NC, RET    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xd8: printf("IF  C, RET    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xe0: printf("IF PO, RET    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xe8: printf("IF PE, RET    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xf0: printf("IF  P, RET    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xf8: printf("IF  M, RET    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xc0: printf("RNZ    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xc8: printf("RZ     $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xd0: printf("RNC    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xd8: printf("RC     $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xe0: printf("RPO    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xe8: printf("RPE    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xf0: printf("RP     $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xf8: printf("RM     $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
 
         case 0xc7: printf("RST    0 (PC <- 00)"); break;
         case 0xcf: printf("RST    1 (PC <- 08)"); break;
