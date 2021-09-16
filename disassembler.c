@@ -296,15 +296,15 @@ int printDisassembledOp(unsigned char* codebuffer, int pc) {
         case 0xf4: printf("CP     $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
         case 0xfc: printf("CM     $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
 
-        case 0xc9: printf("RET    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xc0: printf("RNZ    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xc8: printf("RZ     $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xd0: printf("RNC    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xd8: printf("RC     $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xe0: printf("RPO    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xe8: printf("RPE    $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xf0: printf("RP     $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        case 0xf8: printf("RM     $%02x%02x", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        case 0xc9: printf("RET"); break;
+        case 0xc0: printf("RNZ"); break;
+        case 0xc8: printf("RZ"); break;
+        case 0xd0: printf("RNC"); break;
+        case 0xd8: printf("RC"); break;
+        case 0xe0: printf("RPO"); break;
+        case 0xe8: printf("RPE"); break;
+        case 0xf0: printf("RP"); break;
+        case 0xf8: printf("RM"); break;
 
         case 0xc7: printf("RST    0 (PC <- 00)"); break;
         case 0xcf: printf("RST    1 (PC <- 08)"); break;
