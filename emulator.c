@@ -36,8 +36,12 @@ int EmulateOp8080(State8080* state) {
     unsigned char* opCode = &state->memory[state->PC];
 
     switch(*opCode) {
-        case 0x00: UnimplementedInstruction(state); break;
-        case 0x01: UnimplementedInstruction(state); break;
+        case 0x00: break; // NOP
+        case 0x01:        // LXI B-C
+            state->B = opCode[2];
+            state->C = opCode[2];
+            state->PC += 2;
+            break;
         case 0x02: UnimplementedInstruction(state); break;
         case 0x03: UnimplementedInstruction(state); break;
         case 0x04: UnimplementedInstruction(state); break;
