@@ -1133,6 +1133,8 @@
 08ec MVI    B <- #$20
 08ee JMP    $14cb
 08f1 MVI    C <- #$03
+;;; beginning of subroutine - precondition: D set to address, C set to a count
+; until C is 0 - A takes content of address in D, then a subroutine is called, then D is increased.
 08f3 LDAX   A <- (D-E) 
 08f4 PUSH   D-E
 08f5 CALL   $08ff
@@ -1141,6 +1143,8 @@
 08fa DCR    C <- C - 1
 08fb JNZ    $08f3
 08fe RET
+;;;
+;;; subroutine - 
 08ff LXI    D-E <- #$1e00
 0902 PUSH   H-L
 0903 MVI    H <- #$00
@@ -1154,6 +1158,7 @@
 090c MVI    B <- #$08
 090e OUT    #$06
 0910 JMP    $1439
+;;;
 0913 LDA    A <- ($2009)
 0916 CPI    A - #$78
 0918 RNC
@@ -3599,6 +3604,7 @@
 1434 DCR    B <- B - 1
 1435 JNZ    $1427
 1438 RET
+;;;
 1439 PUSH   B-C
 143a LDAX   A <- (D-E) 
 143b MOV    (H-L) <- A
@@ -3609,6 +3615,7 @@
 1442 DCR    B <- B - 1
 1443 JNZ    $1439
 1446 RET
+;;;
 1447 NOP
 1448 NOP
 1449 NOP
@@ -4260,10 +4267,15 @@
 1917 RC
 1918 INX    H-L <- H-L + 1
 1919 RET
+;;; beginning of subroutine? continues at 08f3
+; C equals 28?
 191a MVI    C <- #$1c
+; H is set to RAM address (above stack)
 191c LXI    H-L <- #$241e
+; D set to ROM address?
 191f LXI    D-E <- #$1ae4
 1922 JMP    $08f3
+;;;
 1925 LXI    H-L <- #$20f8
 1928 JMP    $1931
 192b LXI    H-L <- #$20fc
@@ -4289,6 +4301,7 @@
 ;; beginning of subroutine
 ; call 1a5c - zero out 2400 to 3fff
 1956 CALL   $1a5c
+; call 191a - 
 1959 CALL   $191a
 195c CALL   $1925
 195f CALL   $192b
