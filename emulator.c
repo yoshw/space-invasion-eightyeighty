@@ -26,22 +26,88 @@ typedef struct {
     u_int8_t       int_enable;
 } State8080;
 
-void UnimplementedInstruction(State8080* state) {
-    // PC will have advanced one; walk that back
-    printf("Error: Unimplemented instruction\n");
-    exit(1);
+int emulate8080(FILE *f);
+void emulateOp8080(State8080* state);
+int getFileSize(FILE *f);
+
+u_int16_t getHLAddress(State8080* state);
+void opLXI(State8080* state, u_int8_t* opPointer, u_int8_t* firstReg, u_int8_t* secondReg);
+void opADD(State8080* state, u_int8_t reg);
+int getParity(u_int8_t value);
+void UnimplementedInstruction(State8080* state);
+
+
+int main(int argc, char** argv) {
+    if (argc != 2) {
+        printf("usage: %s PATH\n", argv[0]);
+        exit(1);
+    }
+
+    FILE *f = fopen(argv[1], "rb");
+
+    if (f == NULL) {
+        printf("Error: Couldn't open `%s`\n", argv[1]);
+        exit(1);
+    }
+
+    emulate8080(f);
 }
 
-int EmulateOp8080(State8080* state) {
+int emulate8080(FILE *f) {
+    int fsize = getFileSize(f);
+
+    unsigned char* buffer = malloc(fsize);
+
+    fread(buffer, fsize, 1, f);
+    fclose(f);
+
+    State8080 state = {
+        .A = 0, .B = 0, .C = 0, .D = 0, .E = 0, .H = 0, .L = 0, .SP = 0, .PC = 0,
+        // TODO: size memory properly. current code will lead to segfaults
+        .memory = buffer,
+        .codes = {}, // all codes initialized to zero
+        .int_enable = 1
+    };
+
+    int ops = 0;
+    while (ops < 100) {
+        emulateOp8080(&state);
+    }
+
+    return 0;
+}
+
+void emulateOp8080(State8080* state) {
     unsigned char* opCode = &state->memory[state->PC];
 
     switch(*opCode) {
-        case 0x00: break; // NOP
-        case 0x01:        // LXI B-C
-            state->B = opCode[2];
-            state->C = opCode[2];
-            state->PC += 2;
-            break;
+        // Data Transfer Group
+
+        // LXI
+        case 0x01: opLXI(state, opCode, &state->B, &state->C); break;
+        case 0x11: opLXI(state, opCode, &state->D, &state->E); break;
+        case 0x21: opLXI(state, opCode, &state->H, &state->L); break;
+        // case 0x31: opLXI(state, opCode, ?, ?); break;
+
+
+        // Arithmetic Group
+
+        // ADD
+        case 0x80: opADD(state, state->B); break;
+        case 0x81: opADD(state, state->C); break;
+        case 0x82: opADD(state, state->D); break;
+        case 0x83: opADD(state, state->E); break;
+        case 0x84: opADD(state, state->H); break;
+        case 0x85: opADD(state, state->L); break;
+        case 0x87: opADD(state, state->A); break;
+
+        // ADD M
+        case 0x86: opADD(state, state->memory[getHLAddress(state)]); break;
+
+        // ADI
+        case 0xc6: opADD(state, opCode[1]); break;
+
+
         case 0x02: UnimplementedInstruction(state); break;
         case 0x03: UnimplementedInstruction(state); break;
         case 0x04: UnimplementedInstruction(state); break;
@@ -57,7 +123,6 @@ int EmulateOp8080(State8080* state) {
         case 0x0e: UnimplementedInstruction(state); break;
         case 0x0f: UnimplementedInstruction(state); break;
         case 0x10: UnimplementedInstruction(state); break;
-        case 0x11: UnimplementedInstruction(state); break;
         case 0x12: UnimplementedInstruction(state); break;
         case 0x13: UnimplementedInstruction(state); break;
         case 0x14: UnimplementedInstruction(state); break;
@@ -73,7 +138,6 @@ int EmulateOp8080(State8080* state) {
         case 0x1e: UnimplementedInstruction(state); break;
         case 0x1f: UnimplementedInstruction(state); break;
         case 0x20: UnimplementedInstruction(state); break;
-        case 0x21: UnimplementedInstruction(state); break;
         case 0x22: UnimplementedInstruction(state); break;
         case 0x23: UnimplementedInstruction(state); break;
         case 0x24: UnimplementedInstruction(state); break;
@@ -168,14 +232,6 @@ int EmulateOp8080(State8080* state) {
         case 0x7d: UnimplementedInstruction(state); break;
         case 0x7e: UnimplementedInstruction(state); break;
         case 0x7f: UnimplementedInstruction(state); break;
-        case 0x80: UnimplementedInstruction(state); break;
-        case 0x81: UnimplementedInstruction(state); break;
-        case 0x82: UnimplementedInstruction(state); break;
-        case 0x83: UnimplementedInstruction(state); break;
-        case 0x84: UnimplementedInstruction(state); break;
-        case 0x85: UnimplementedInstruction(state); break;
-        case 0x86: UnimplementedInstruction(state); break;
-        case 0x87: UnimplementedInstruction(state); break;
         case 0x88: UnimplementedInstruction(state); break;
         case 0x89: UnimplementedInstruction(state); break;
         case 0x8a: UnimplementedInstruction(state); break;
@@ -238,7 +294,6 @@ int EmulateOp8080(State8080* state) {
         case 0xc3: UnimplementedInstruction(state); break;
         case 0xc4: UnimplementedInstruction(state); break;
         case 0xc5: UnimplementedInstruction(state); break;
-        case 0xc6: UnimplementedInstruction(state); break;
         case 0xc7: UnimplementedInstruction(state); break;
         case 0xc8: UnimplementedInstruction(state); break;
         case 0xc9: UnimplementedInstruction(state); break;
@@ -296,8 +351,50 @@ int EmulateOp8080(State8080* state) {
         case 0xfd: UnimplementedInstruction(state); break;
         case 0xfe: UnimplementedInstruction(state); break;
         case 0xff: UnimplementedInstruction(state); break;
+
+        // Stack, I/O, and Machine Control group
+        case 0x00: break; // NOP
     }
 
     // operation consumed, so advance
     state->PC++;
+}
+
+u_int16_t getHLAddress(State8080* state) {
+    return (state->H << 8) | (state->L);
+}
+
+void opLXI(State8080* state, u_int8_t* opPointer, u_int8_t* firstReg, u_int8_t* secondReg) {
+    *firstReg = opPointer[2];
+    *secondReg = opPointer[1];
+    state->PC += 2;
+}
+
+void opADD(State8080* state, u_int8_t addend) {
+    u_int16_t answer = (u_int16_t) state->A + (u_int16_t) addend;
+    u_int8_t ansTruncated = answer & 0xff;
+
+    state->codes.Z = (ansTruncated == 0);
+    state->codes.S = ((answer & 0x80) != 0);
+    state->codes.P = getParity(ansTruncated);
+    state->codes.CY = answer > 0xff;
+
+    state->A = ansTruncated;
+}
+
+int getParity(u_int8_t value) {
+    return 1;
+}
+
+void UnimplementedInstruction(State8080* state) {
+    state->PC -= 1;
+    printf("Error: Unimplemented instruction\n");
+    exit(1);
+}
+
+int getFileSize(FILE *f) {
+    fseek(f, 0L, SEEK_END);
+    int fsize = ftell(f);
+    fseek(f, 0L, SEEK_SET);
+    return fsize;
 }
