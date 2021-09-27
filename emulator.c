@@ -33,6 +33,7 @@ int getFileSize(FILE *f);
 u_int16_t getHLAddress(State8080* state);
 void opLXI(State8080* state, u_int8_t* opPointer, u_int8_t* firstReg, u_int8_t* secondReg);
 void opADD(State8080* state, u_int8_t reg);
+void opADC(State8080* state, u_int8_t reg);
 int getParity(u_int8_t value);
 void UnimplementedInstruction(State8080* state);
 
@@ -106,6 +107,21 @@ void emulateOp8080(State8080* state) {
 
         // ADI
         case 0xc6: opADD(state, opCode[1]); break;
+
+        // ADC
+        case 0x88: opADC(state, state->B); break;
+        case 0x89: opADC(state, state->C); break;
+        case 0x8a: opADC(state, state->D); break;
+        case 0x8b: opADC(state, state->E); break;
+        case 0x8c: opADC(state, state->H); break;
+        case 0x8d: opADC(state, state->L); break;
+        case 0x8f: opADC(state, state->A); break;
+
+        // ADC M
+        case 0x8e: opADC(state, state->memory[getHLAddress(state)]); break;
+
+        // ACI
+        case 0xce: opADC(state, opCode[1]); break;
 
 
         case 0x02: UnimplementedInstruction(state); break;
@@ -232,14 +248,6 @@ void emulateOp8080(State8080* state) {
         case 0x7d: UnimplementedInstruction(state); break;
         case 0x7e: UnimplementedInstruction(state); break;
         case 0x7f: UnimplementedInstruction(state); break;
-        case 0x88: UnimplementedInstruction(state); break;
-        case 0x89: UnimplementedInstruction(state); break;
-        case 0x8a: UnimplementedInstruction(state); break;
-        case 0x8b: UnimplementedInstruction(state); break;
-        case 0x8c: UnimplementedInstruction(state); break;
-        case 0x8d: UnimplementedInstruction(state); break;
-        case 0x8e: UnimplementedInstruction(state); break;
-        case 0x8f: UnimplementedInstruction(state); break;
         case 0x90: UnimplementedInstruction(state); break;
         case 0x91: UnimplementedInstruction(state); break;
         case 0x92: UnimplementedInstruction(state); break;
@@ -301,7 +309,6 @@ void emulateOp8080(State8080* state) {
         case 0xcb: UnimplementedInstruction(state); break;
         case 0xcc: UnimplementedInstruction(state); break;
         case 0xcd: UnimplementedInstruction(state); break;
-        case 0xce: UnimplementedInstruction(state); break;
         case 0xcf: UnimplementedInstruction(state); break;
         case 0xd0: UnimplementedInstruction(state); break;
         case 0xd1: UnimplementedInstruction(state); break;
@@ -372,6 +379,18 @@ void opLXI(State8080* state, u_int8_t* opPointer, u_int8_t* firstReg, u_int8_t* 
 
 void opADD(State8080* state, u_int8_t addend) {
     u_int16_t answer = (u_int16_t) state->A + (u_int16_t) addend;
+    u_int8_t ansTruncated = answer & 0xff;
+
+    state->codes.Z = (ansTruncated == 0);
+    state->codes.S = ((answer & 0x80) != 0);
+    state->codes.P = getParity(ansTruncated);
+    state->codes.CY = answer > 0xff;
+
+    state->A = ansTruncated;
+}
+
+void opADC(State8080* state, u_int8_t addend) {
+    u_int16_t answer = (u_int16_t) state->A + (u_int16_t) addend + (u_int16_t) state->codes.CY;
     u_int8_t ansTruncated = answer & 0xff;
 
     state->codes.Z = (ansTruncated == 0);
