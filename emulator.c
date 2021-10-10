@@ -33,14 +33,18 @@ int getFileSize(FILE *f);
 u_int16_t getHLAddress(State8080* state);
 
 void opLXI(State8080* state, u_int8_t* opPointer, u_int8_t* firstReg, u_int8_t* secondReg);
-void opADD(State8080* state, u_int16_t reg);
+void opADD(State8080* state, u_int16_t addend);
 void opADI(State8080* state);
-void opADC(State8080* state, u_int16_t reg);
+void opADC(State8080* state, u_int16_t addend);
 void opACI(State8080* state);
 void opSUB(State8080* state, u_int16_t subtrahend);
 void opSUI(State8080* state);
 void opSBB(State8080* state, u_int16_t subtrahend);
 void opSBI(State8080* state);
+void opINR(State8080* state, u_int8_t* address);
+void opDCR(State8080* state, u_int8_t* address);
+void opINX(State8080* state, u_int8_t* firstReg, u_int8_t* secondReg);
+void opDCX(State8080* state, u_int8_t* firstReg, u_int8_t* secondReg);
 
 int getParity(u_int8_t value);
 void UnimplementedInstruction(State8080* state);
@@ -161,64 +165,76 @@ void emulateOp8080(State8080* state) {
         // SBI
         case 0xde: opSBI(state); break;
 
+        // INR
+        case 0x04: opINR(state, &state->B); break;
+        case 0x0c: opINR(state, &state->C); break;
+        case 0x14: opINR(state, &state->D); break;
+        case 0x1c: opINR(state, &state->E); break;
+        case 0x24: opINR(state, &state->H); break;
+        case 0x2c: opINR(state, &state->L); break;
+        case 0x3c: opINR(state, &state->A); break;
+
+        // INR M
+        case 0x34: opINR(state, &state->memory[getHLAddress(state)]); break;
+
+        // DCR
+        case 0x05: opDCR(state, &state->B); break;
+        case 0x0d: opDCR(state, &state->C); break;
+        case 0x15: opDCR(state, &state->D); break;
+        case 0x1d: opDCR(state, &state->E); break;
+        case 0x25: opDCR(state, &state->H); break;
+        case 0x2d: opDCR(state, &state->L); break;
+        case 0x3d: opDCR(state, &state->A); break;
+
+        // DCR M
+        case 0x35: opDCR(state, &state->memory[getHLAddress(state)]); break;
+
+        // INX
+        case 0x03: opINX(state, &state->B, &state->C); break;
+        case 0x13: opINX(state, &state->D, &state->E); break;
+        case 0x23: opINX(state, &state->H, &state->L); break;
+        case 0x33: state->SP += 1; break;
+
+        // DCX
+        case 0x0b: opDCX(state, &state->B, &state->C); break;
+        case 0x1b: opDCX(state, &state->D, &state->E); break;
+        case 0x2b: opDCX(state, &state->H, &state->L); break;
+        case 0x3b: state->SP -= 1; break;
+
         case 0x02: UnimplementedInstruction(state); break;
-        case 0x03: UnimplementedInstruction(state); break;
-        case 0x04: UnimplementedInstruction(state); break;
-        case 0x05: UnimplementedInstruction(state); break;
         case 0x06: UnimplementedInstruction(state); break;
         case 0x07: UnimplementedInstruction(state); break;
         case 0x08: UnimplementedInstruction(state); break;
         case 0x09: UnimplementedInstruction(state); break;
         case 0x0a: UnimplementedInstruction(state); break;
-        case 0x0b: UnimplementedInstruction(state); break;
-        case 0x0c: UnimplementedInstruction(state); break;
-        case 0x0d: UnimplementedInstruction(state); break;
         case 0x0e: UnimplementedInstruction(state); break;
         case 0x0f: UnimplementedInstruction(state); break;
         case 0x10: UnimplementedInstruction(state); break;
         case 0x12: UnimplementedInstruction(state); break;
-        case 0x13: UnimplementedInstruction(state); break;
-        case 0x14: UnimplementedInstruction(state); break;
-        case 0x15: UnimplementedInstruction(state); break;
         case 0x16: UnimplementedInstruction(state); break;
         case 0x17: UnimplementedInstruction(state); break;
         case 0x18: UnimplementedInstruction(state); break;
         case 0x19: UnimplementedInstruction(state); break;
         case 0x1a: UnimplementedInstruction(state); break;
-        case 0x1b: UnimplementedInstruction(state); break;
-        case 0x1c: UnimplementedInstruction(state); break;
-        case 0x1d: UnimplementedInstruction(state); break;
         case 0x1e: UnimplementedInstruction(state); break;
         case 0x1f: UnimplementedInstruction(state); break;
         case 0x20: UnimplementedInstruction(state); break;
         case 0x22: UnimplementedInstruction(state); break;
-        case 0x23: UnimplementedInstruction(state); break;
-        case 0x24: UnimplementedInstruction(state); break;
-        case 0x25: UnimplementedInstruction(state); break;
         case 0x26: UnimplementedInstruction(state); break;
         case 0x27: UnimplementedInstruction(state); break;
         case 0x28: UnimplementedInstruction(state); break;
         case 0x29: UnimplementedInstruction(state); break;
         case 0x2a: UnimplementedInstruction(state); break;
-        case 0x2b: UnimplementedInstruction(state); break;
-        case 0x2c: UnimplementedInstruction(state); break;
-        case 0x2d: UnimplementedInstruction(state); break;
         case 0x2e: UnimplementedInstruction(state); break;
         case 0x2f: UnimplementedInstruction(state); break;
         case 0x30: UnimplementedInstruction(state); break;
         case 0x31: UnimplementedInstruction(state); break;
         case 0x32: UnimplementedInstruction(state); break;
-        case 0x33: UnimplementedInstruction(state); break;
-        case 0x34: UnimplementedInstruction(state); break;
-        case 0x35: UnimplementedInstruction(state); break;
         case 0x36: UnimplementedInstruction(state); break;
         case 0x37: UnimplementedInstruction(state); break;
         case 0x38: UnimplementedInstruction(state); break;
         case 0x39: UnimplementedInstruction(state); break;
         case 0x3a: UnimplementedInstruction(state); break;
-        case 0x3b: UnimplementedInstruction(state); break;
-        case 0x3c: UnimplementedInstruction(state); break;
-        case 0x3d: UnimplementedInstruction(state); break;
         case 0x3e: UnimplementedInstruction(state); break;
         case 0x3f: UnimplementedInstruction(state); break;
         case 0x40: UnimplementedInstruction(state); break;
@@ -454,6 +470,34 @@ void opSBI(State8080* state) {
     u_int8_t nextByte = state->memory[state->PC+1];
     opSUB(state, nextByte + state->codes.CY);
     state->PC += 1;
+}
+
+void opINR(State8080* state, u_int8_t* address) {
+    *address += 1;
+    state->codes.Z = (*address == 0);
+    state->codes.S = ((*address & 0x80) != 0);
+    state->codes.P = getParity(*address);
+}
+
+void opDCR(State8080* state, u_int8_t* address) {
+    *address -= 1;
+    state->codes.Z = (*address == 0);
+    state->codes.S = ((*address & 0x80) != 0);
+    state->codes.P = getParity(*address);
+}
+
+void opINX(State8080* state, u_int8_t* firstReg, u_int8_t* secondReg) {
+    u_int16_t word = (*firstReg << 8) | *secondReg;
+    word += 1;
+    *firstReg = (word & 0xff00) >> 8;
+    *secondReg = word & 0xff;
+}
+
+void opDCX(State8080* state, u_int8_t* firstReg, u_int8_t* secondReg) {
+    u_int16_t word = (*firstReg << 8) | *secondReg;
+    word -= 1;
+    *firstReg = (word & 0xff00) >> 8;
+    *secondReg = word & 0xff;
 }
 
 int getParity(u_int8_t value) {
