@@ -31,8 +31,6 @@ typedef struct {
 int emulate8080(FILE *f);
 void emulateOp8080(State8080* state);
 
-u_int16_t getHLAddress(State8080* state);
-
 void opLXI(State8080* state, u_int8_t* opPointer, u_int8_t* firstReg, u_int8_t* secondReg);
 void opLXI_sp(State8080* state, u_int8_t* opPointer);
 void opADD(State8080* state, u_int16_t addend);
@@ -50,8 +48,13 @@ void opDCX(State8080* state, u_int8_t* firstReg, u_int8_t* secondReg);
 void opDAD(State8080* state, u_int8_t firstReg, u_int8_t secondReg);
 void opDAD_sp(State8080* state);
 void opDAA(State8080* state);
+void opJMP(State8080* state, u_int8_t* opPointer);
+void opJMPConditional(State8080* state, u_int8_t* opPointer, u_int8_t condition);
 
+u_int16_t getHLValue(State8080* state);
+u_int16_t wordFromBytes(u_int8_t left, u_int8_t right);
 u_int8_t getParity(u_int8_t value);
+
 void UnimplementedInstruction(State8080* state);
 
 
@@ -125,7 +128,7 @@ void emulateOp8080(State8080* state) {
         case 0x87: opADD(state, state->A); break;
 
         // ADD M
-        case 0x86: opADD(state, state->memory[getHLAddress(state)]); break;
+        case 0x86: opADD(state, state->memory[getHLValue(state)]); break;
 
         // ADI
         case 0xc6: opADI(state); break;
@@ -140,7 +143,7 @@ void emulateOp8080(State8080* state) {
         case 0x8f: opADC(state, state->A); break;
 
         // ADC M
-        case 0x8e: opADC(state, state->memory[getHLAddress(state)]); break;
+        case 0x8e: opADC(state, state->memory[getHLValue(state)]); break;
 
         // ACI
         case 0xce: opACI(state); break;
@@ -155,7 +158,7 @@ void emulateOp8080(State8080* state) {
         case 0x97: opSUB(state, state->A); break;
 
         // SUB M
-        case 0x96: opSUB(state, state->memory[getHLAddress(state)]); break;
+        case 0x96: opSUB(state, state->memory[getHLValue(state)]); break;
 
         // SUI
         case 0xd6: opSUI(state); break;
@@ -170,7 +173,7 @@ void emulateOp8080(State8080* state) {
         case 0x9f: opSBB(state, state->A); break;
 
         // SBB M
-        case 0x9e: opSBB(state, state->memory[getHLAddress(state)]); break;
+        case 0x9e: opSBB(state, state->memory[getHLValue(state)]); break;
 
         // SBI
         case 0xde: opSBI(state); break;
@@ -185,7 +188,7 @@ void emulateOp8080(State8080* state) {
         case 0x3c: opINR(state, &state->A); break;
 
         // INR M
-        case 0x34: opINR(state, &state->memory[getHLAddress(state)]); break;
+        case 0x34: opINR(state, &state->memory[getHLValue(state)]); break;
 
         // DCR
         case 0x05: opDCR(state, &state->B); break;
@@ -197,7 +200,7 @@ void emulateOp8080(State8080* state) {
         case 0x3d: opDCR(state, &state->A); break;
 
         // DCR M
-        case 0x35: opDCR(state, &state->memory[getHLAddress(state)]); break;
+        case 0x35: opDCR(state, &state->memory[getHLValue(state)]); break;
 
         // INX
         case 0x03: opINX(state, &state->B, &state->C); break;
@@ -221,6 +224,20 @@ void emulateOp8080(State8080* state) {
         case 0x27: opDAA(state); break;
 
         // Logical Group
+
+        // JMP etc
+        case 0xc3: opJMP(state, opCode); break;
+        case 0xc2: opJMPConditional(state, opCode, !state->codes.Z); break;
+        case 0xca: opJMPConditional(state, opCode, state->codes.Z); break;
+        case 0xd2: opJMPConditional(state, opCode, !state->codes.CY); break;
+        case 0xda: opJMPConditional(state, opCode, state->codes.CY); break;
+        case 0xe2: opJMPConditional(state, opCode, !state->codes.P); break;
+        case 0xea: opJMPConditional(state, opCode, state->codes.P); break;
+        case 0xf2: opJMPConditional(state, opCode, !state->codes.S); break;
+        case 0xfa: opJMPConditional(state, opCode, state->codes.S); break;
+
+        // Branch Group
+
         case 0x02: UnimplementedInstruction(state); break;
         case 0x06: UnimplementedInstruction(state); break;
         case 0x07: UnimplementedInstruction(state); break;
@@ -349,35 +366,29 @@ void emulateOp8080(State8080* state) {
         case 0xbf: UnimplementedInstruction(state); break;
         case 0xc0: UnimplementedInstruction(state); break;
         case 0xc1: UnimplementedInstruction(state); break;
-        case 0xc2: UnimplementedInstruction(state); break;
-        case 0xc3: UnimplementedInstruction(state); break;
         case 0xc4: UnimplementedInstruction(state); break;
         case 0xc5: UnimplementedInstruction(state); break;
         case 0xc7: UnimplementedInstruction(state); break;
         case 0xc8: UnimplementedInstruction(state); break;
         case 0xc9: UnimplementedInstruction(state); break;
-        case 0xca: UnimplementedInstruction(state); break;
         case 0xcb: UnimplementedInstruction(state); break;
         case 0xcc: UnimplementedInstruction(state); break;
         case 0xcd: UnimplementedInstruction(state); break;
         case 0xcf: UnimplementedInstruction(state); break;
         case 0xd0: UnimplementedInstruction(state); break;
         case 0xd1: UnimplementedInstruction(state); break;
-        case 0xd2: UnimplementedInstruction(state); break;
         case 0xd3: UnimplementedInstruction(state); break;
         case 0xd4: UnimplementedInstruction(state); break;
         case 0xd5: UnimplementedInstruction(state); break;
         case 0xd7: UnimplementedInstruction(state); break;
         case 0xd8: UnimplementedInstruction(state); break;
         case 0xd9: UnimplementedInstruction(state); break;
-        case 0xda: UnimplementedInstruction(state); break;
         case 0xdb: UnimplementedInstruction(state); break;
         case 0xdc: UnimplementedInstruction(state); break;
         case 0xdd: UnimplementedInstruction(state); break;
         case 0xdf: UnimplementedInstruction(state); break;
         case 0xe0: UnimplementedInstruction(state); break;
         case 0xe1: UnimplementedInstruction(state); break;
-        case 0xe2: UnimplementedInstruction(state); break;
         case 0xe3: UnimplementedInstruction(state); break;
         case 0xe4: UnimplementedInstruction(state); break;
         case 0xe5: UnimplementedInstruction(state); break;
@@ -385,7 +396,6 @@ void emulateOp8080(State8080* state) {
         case 0xe7: UnimplementedInstruction(state); break;
         case 0xe8: UnimplementedInstruction(state); break;
         case 0xe9: UnimplementedInstruction(state); break;
-        case 0xea: UnimplementedInstruction(state); break;
         case 0xeb: UnimplementedInstruction(state); break;
         case 0xec: UnimplementedInstruction(state); break;
         case 0xed: UnimplementedInstruction(state); break;
@@ -393,7 +403,6 @@ void emulateOp8080(State8080* state) {
         case 0xef: UnimplementedInstruction(state); break;
         case 0xf0: UnimplementedInstruction(state); break;
         case 0xf1: UnimplementedInstruction(state); break;
-        case 0xf2: UnimplementedInstruction(state); break;
         case 0xf3: UnimplementedInstruction(state); break;
         case 0xf4: UnimplementedInstruction(state); break;
         case 0xf5: UnimplementedInstruction(state); break;
@@ -401,7 +410,6 @@ void emulateOp8080(State8080* state) {
         case 0xf7: UnimplementedInstruction(state); break;
         case 0xf8: UnimplementedInstruction(state); break;
         case 0xf9: UnimplementedInstruction(state); break;
-        case 0xfa: UnimplementedInstruction(state); break;
         case 0xfb: UnimplementedInstruction(state); break;
         case 0xfc: UnimplementedInstruction(state); break;
         case 0xfd: UnimplementedInstruction(state); break;
@@ -420,11 +428,7 @@ void emulateOp8080(State8080* state) {
         state->codes.CY, state->codes.P, state->codes.S, state->codes.Z, state->codes.AC);
     printf("    A $%02x | B $%02x C $%02x | D $%02x E $%02x | H $%02x L $%02x\n",
         state->A, state->B, state->C, state->D, state->E, state->H, state->L);
-    printf("    SP %04x\n\n", state->SP);
-}
-
-u_int16_t getHLAddress(State8080* state) {
-    return (state->H << 8) | (state->L);
+    printf("    SP $%04x\n\n", state->SP);
 }
 
 void opLXI(State8080* state, u_int8_t* opPointer, u_int8_t* firstReg, u_int8_t* secondReg) {
@@ -434,7 +438,7 @@ void opLXI(State8080* state, u_int8_t* opPointer, u_int8_t* firstReg, u_int8_t* 
 }
 
 void opLXI_sp(State8080* state, u_int8_t* opPointer) {
-    u_int16_t combinedValue = (opPointer[2] << 8) | opPointer[1];
+    u_int16_t combinedValue = wordFromBytes(opPointer[2], opPointer[1]);
     state->SP = combinedValue;
     state->PC += 2;
 }
@@ -514,22 +518,22 @@ void opDCR(State8080* state, u_int8_t* address) {
 }
 
 void opINX(State8080* state, u_int8_t* firstReg, u_int8_t* secondReg) {
-    u_int16_t word = (*firstReg << 8) | *secondReg;
+    u_int16_t word = wordFromBytes(*firstReg, *secondReg);
     word += 1;
     *firstReg = (word & 0xff00) >> 8;
     *secondReg = word & 0xff;
 }
 
 void opDCX(State8080* state, u_int8_t* firstReg, u_int8_t* secondReg) {
-    u_int16_t word = (*firstReg << 8) | *secondReg;
+    u_int16_t word = wordFromBytes(*firstReg, *secondReg);
     word -= 1;
     *firstReg = (word & 0xff00) >> 8;
     *secondReg = word & 0xff;
 }
 
 void opDAD(State8080* state, u_int8_t firstReg, u_int8_t secondReg) {
-    u_int16_t hlValue = (state->H << 8) | state->L;
-    u_int16_t addend = (firstReg << 8) | secondReg;
+    u_int16_t hlValue = getHLValue(state);
+    u_int16_t addend = wordFromBytes(firstReg, secondReg);
 
     u_int32_t sum = (u_int32_t) hlValue + (u_int32_t) addend;
     u_int16_t sumTruncated = sum & 0x0000ffff;
@@ -541,7 +545,7 @@ void opDAD(State8080* state, u_int8_t firstReg, u_int8_t secondReg) {
 }
 
 void opDAD_sp(State8080* state) {
-    u_int16_t hlValue = (state->H << 8) | state->L;
+    u_int16_t hlValue = getHLValue(state);
 
     u_int32_t sum = (u_int32_t) hlValue + (u_int32_t) state->SP;
     u_int16_t sumTruncated = sum & 0x0000ffff;
@@ -574,11 +578,34 @@ void opDAA(State8080* state) {
     state->codes.P = getParity(state->A);
 }
 
+void opJMP(State8080* state, u_int8_t* opPointer) {
+    state->PC = wordFromBytes(opPointer[2], opPointer[1]);
+
+    // account for PC auto-advance
+    state->PC -= 1;
+}
+
+void opJMPConditional(State8080* state, u_int8_t* opPointer, u_int8_t condition) {
+    if (condition) {
+        opJMP(state, opPointer);
+    } else {
+        state->PC += 2;
+    }
+}
+
+u_int16_t getHLValue(State8080* state) {
+    return wordFromBytes(state->H, state->L);
+}
+
+u_int16_t wordFromBytes(u_int8_t left, u_int8_t right) {
+    return (left << 8) | right;
+}
+
 u_int8_t getParity(u_int8_t value) {
     u_int8_t temp = value ^ (value >> 4);
     temp = temp ^ (temp >> 2);
     temp = temp ^ (temp >> 1);
-    return temp & 1;
+    return !(temp & 1);
 }
 
 void UnimplementedInstruction(State8080* state) {
