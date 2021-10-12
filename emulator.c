@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "disassembler.h"
+
 typedef struct {
     u_int8_t    Z:1;
     u_int8_t    S:1;
@@ -28,7 +30,6 @@ typedef struct {
 
 int emulate8080(FILE *f);
 void emulateOp8080(State8080* state);
-int getFileSize(FILE *f);
 
 u_int16_t getHLAddress(State8080* state);
 
@@ -46,7 +47,7 @@ void opINR(State8080* state, u_int8_t* address);
 void opDCR(State8080* state, u_int8_t* address);
 void opINX(State8080* state, u_int8_t* firstReg, u_int8_t* secondReg);
 void opDCX(State8080* state, u_int8_t* firstReg, u_int8_t* secondReg);
-void opDAD(State8080* state, u_int8_t* firstReg, u_int8_t* secondReg);
+void opDAD(State8080* state, u_int8_t firstReg, u_int8_t secondReg);
 void opDAD_sp(State8080* state);
 void opDAA(State8080* state);
 
@@ -95,6 +96,11 @@ int emulate8080(FILE *f) {
 }
 
 void emulateOp8080(State8080* state) {
+    printf("[ PC %04x ]\n", state->PC);
+    printf("-----------\n");
+    printDisassembledOp(state->memory, state->PC);
+    printf("-----------\n");
+
     unsigned char* opCode = &state->memory[state->PC];
 
     switch(*opCode) {
@@ -408,6 +414,13 @@ void emulateOp8080(State8080* state) {
 
     // operation consumed, so advance
     state->PC++;
+
+    printf("==> Resulting processor state\n");
+    printf("    C=%d,P=%d,S=%d,Z=%d,AC=%d\n",
+        state->codes.CY, state->codes.P, state->codes.S, state->codes.Z, state->codes.AC);
+    printf("    A $%02x | B $%02x C $%02x | D $%02x E $%02x | H $%02x L $%02x\n",
+        state->A, state->B, state->C, state->D, state->E, state->H, state->L);
+    printf("    SP %04x\n\n", state->SP);
 }
 
 u_int16_t getHLAddress(State8080* state) {
@@ -514,9 +527,9 @@ void opDCX(State8080* state, u_int8_t* firstReg, u_int8_t* secondReg) {
     *secondReg = word & 0xff;
 }
 
-void opDAD(State8080* state, u_int8_t* firstReg, u_int8_t* secondReg) {
+void opDAD(State8080* state, u_int8_t firstReg, u_int8_t secondReg) {
     u_int16_t hlValue = (state->H << 8) | state->L;
-    u_int16_t addend = (*firstReg << 8) | *secondReg;
+    u_int16_t addend = (firstReg << 8) | secondReg;
 
     u_int32_t sum = (u_int32_t) hlValue + (u_int32_t) addend;
     u_int16_t sumTruncated = sum & 0x0000ffff;
@@ -573,11 +586,4 @@ void UnimplementedInstruction(State8080* state) {
     printf("Error: Unimplemented instruction (0x%02x at offset 0x%02x)\n", opCode, state->PC);
     state->PC -= 1;
     exit(1);
-}
-
-int getFileSize(FILE *f) {
-    fseek(f, 0L, SEEK_END);
-    int fsize = ftell(f);
-    fseek(f, 0L, SEEK_SET);
-    return fsize;
 }

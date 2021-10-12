@@ -6,21 +6,21 @@ int printDisassembledOp(unsigned char* buffer, int pc);
 int getFileSize(FILE *f);
 
 
-int main(int argc, char** argv) {
-    if (argc != 2) {
-        printf("usage: %s PATH\n", argv[0]);
-        exit(1);
-    }
+// int main(int argc, char** argv) {
+//     if (argc != 2) {
+//         printf("usage: %s PATH\n", argv[0]);
+//         exit(1);
+//     }
 
-    FILE *f = fopen(argv[1], "rb");
+//     FILE *f = fopen(argv[1], "rb");
 
-    if (f == NULL) {
-        printf("Error: Couldn't open `%s`\n", argv[1]);
-        exit(1);
-    }
+//     if (f == NULL) {
+//         printf("Error: Couldn't open `%s`\n", argv[1]);
+//         exit(1);
+//     }
 
-    disassemble8080Code(f);
-}
+//     disassemble8080Code(f);
+// }
 
 int disassemble8080Code(FILE *f) {
     int fsize = getFileSize(f);
