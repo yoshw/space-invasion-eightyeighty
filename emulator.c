@@ -33,6 +33,7 @@ int getFileSize(FILE *f);
 u_int16_t getHLAddress(State8080* state);
 
 void opLXI(State8080* state, u_int8_t* opPointer, u_int8_t* firstReg, u_int8_t* secondReg);
+void opLXI_sp(State8080* state, u_int8_t* opPointer);
 void opADD(State8080* state, u_int16_t addend);
 void opADI(State8080* state);
 void opADC(State8080* state, u_int16_t addend);
@@ -45,8 +46,11 @@ void opINR(State8080* state, u_int8_t* address);
 void opDCR(State8080* state, u_int8_t* address);
 void opINX(State8080* state, u_int8_t* firstReg, u_int8_t* secondReg);
 void opDCX(State8080* state, u_int8_t* firstReg, u_int8_t* secondReg);
+void opDAD(State8080* state, u_int8_t* firstReg, u_int8_t* secondReg);
+void opDAD_sp(State8080* state);
+void opDAA(State8080* state);
 
-int getParity(u_int8_t value);
+u_int8_t getParity(u_int8_t value);
 void UnimplementedInstruction(State8080* state);
 
 
@@ -100,7 +104,7 @@ void emulateOp8080(State8080* state) {
         case 0x01: opLXI(state, opCode, &state->B, &state->C); break;
         case 0x11: opLXI(state, opCode, &state->D, &state->E); break;
         case 0x21: opLXI(state, opCode, &state->H, &state->L); break;
-        // case 0x31: opLXI(state, opCode, ?, ?); break;
+        case 0x31: opLXI_sp(state, opCode); break;
 
 
         // Arithmetic Group
@@ -201,11 +205,20 @@ void emulateOp8080(State8080* state) {
         case 0x2b: opDCX(state, &state->H, &state->L); break;
         case 0x3b: state->SP -= 1; break;
 
+        // DAD
+        case 0x09: opDAD(state, state->B, state->C); break;
+        case 0x19: opDAD(state, state->D, state->E); break;
+        case 0x29: opDAD(state, state->H, state->L); break;
+        case 0x39: opDAD_sp(state); break;
+
+        // DAA
+        case 0x27: opDAA(state); break;
+
+        // Logical Group
         case 0x02: UnimplementedInstruction(state); break;
         case 0x06: UnimplementedInstruction(state); break;
         case 0x07: UnimplementedInstruction(state); break;
         case 0x08: UnimplementedInstruction(state); break;
-        case 0x09: UnimplementedInstruction(state); break;
         case 0x0a: UnimplementedInstruction(state); break;
         case 0x0e: UnimplementedInstruction(state); break;
         case 0x0f: UnimplementedInstruction(state); break;
@@ -214,26 +227,21 @@ void emulateOp8080(State8080* state) {
         case 0x16: UnimplementedInstruction(state); break;
         case 0x17: UnimplementedInstruction(state); break;
         case 0x18: UnimplementedInstruction(state); break;
-        case 0x19: UnimplementedInstruction(state); break;
         case 0x1a: UnimplementedInstruction(state); break;
         case 0x1e: UnimplementedInstruction(state); break;
         case 0x1f: UnimplementedInstruction(state); break;
         case 0x20: UnimplementedInstruction(state); break;
         case 0x22: UnimplementedInstruction(state); break;
         case 0x26: UnimplementedInstruction(state); break;
-        case 0x27: UnimplementedInstruction(state); break;
         case 0x28: UnimplementedInstruction(state); break;
-        case 0x29: UnimplementedInstruction(state); break;
         case 0x2a: UnimplementedInstruction(state); break;
         case 0x2e: UnimplementedInstruction(state); break;
         case 0x2f: UnimplementedInstruction(state); break;
         case 0x30: UnimplementedInstruction(state); break;
-        case 0x31: UnimplementedInstruction(state); break;
         case 0x32: UnimplementedInstruction(state); break;
         case 0x36: UnimplementedInstruction(state); break;
         case 0x37: UnimplementedInstruction(state); break;
         case 0x38: UnimplementedInstruction(state); break;
-        case 0x39: UnimplementedInstruction(state); break;
         case 0x3a: UnimplementedInstruction(state); break;
         case 0x3e: UnimplementedInstruction(state); break;
         case 0x3f: UnimplementedInstruction(state); break;
@@ -412,6 +420,12 @@ void opLXI(State8080* state, u_int8_t* opPointer, u_int8_t* firstReg, u_int8_t* 
     state->PC += 2;
 }
 
+void opLXI_sp(State8080* state, u_int8_t* opPointer) {
+    u_int16_t combinedValue = (opPointer[2] << 8) | opPointer[1];
+    state->SP = combinedValue;
+    state->PC += 2;
+}
+
 /**
  * Implicitly converts `addend` to uint16 if uint8
  */
@@ -500,8 +514,58 @@ void opDCX(State8080* state, u_int8_t* firstReg, u_int8_t* secondReg) {
     *secondReg = word & 0xff;
 }
 
-int getParity(u_int8_t value) {
-    return 1;
+void opDAD(State8080* state, u_int8_t* firstReg, u_int8_t* secondReg) {
+    u_int16_t hlValue = (state->H << 8) | state->L;
+    u_int16_t addend = (*firstReg << 8) | *secondReg;
+
+    u_int32_t sum = (u_int32_t) hlValue + (u_int32_t) addend;
+    u_int16_t sumTruncated = sum & 0x0000ffff;
+
+    state->codes.CY = sum > 0xffff;
+
+    state->H = (sumTruncated & 0xff00) >> 8;
+    state->L = sumTruncated & 0xff;
+}
+
+void opDAD_sp(State8080* state) {
+    u_int16_t hlValue = (state->H << 8) | state->L;
+
+    u_int32_t sum = (u_int32_t) hlValue + (u_int32_t) state->SP;
+    u_int16_t sumTruncated = sum & 0x0000ffff;
+
+    state->codes.CY = sum > 0xffff;
+
+    state->H = (sumTruncated & 0xff00) >> 8;
+    state->L = sumTruncated & 0xff;
+}
+
+void opDAA(State8080* state) {
+    u_int8_t lsb = state->A & 0xf0;
+    u_int8_t originalMsb = (state->A & 0xf0) >> 4;
+    if ((lsb > 9) || state->codes.AC) {
+        state->A += 6;
+    }
+
+    u_int8_t msb = (state->A & 0xf0) >> 4;
+    state->codes.AC = msb > originalMsb;
+
+    u_int16_t sum = (u_int16_t) state->A;
+    if ((msb > 9) || state->codes.CY) {
+        sum += 0x0060;
+        state->A = sum & 0xff;
+    }
+    state->codes.CY = sum > 0xff;
+
+    state->codes.Z = (state->A == 0);
+    state->codes.S = ((state->A & 0x80) != 0);
+    state->codes.P = getParity(state->A);
+}
+
+u_int8_t getParity(u_int8_t value) {
+    u_int8_t temp = value ^ (value >> 4);
+    temp = temp ^ (temp >> 2);
+    temp = temp ^ (temp >> 1);
+    return temp & 1;
 }
 
 void UnimplementedInstruction(State8080* state) {
