@@ -50,6 +50,8 @@ void opDAD_sp(State8080* state);
 void opDAA(State8080* state);
 void opJMP(State8080* state, u_int8_t* opPointer);
 void opJMPConditional(State8080* state, u_int8_t* opPointer, u_int8_t condition);
+void opCALL(State8080* state, u_int8_t* opPointer);
+void opCALLConditional(State8080* state, u_int8_t* opPointer, u_int8_t condition);
 
 u_int16_t getHLValue(State8080* state);
 u_int16_t wordFromBytes(u_int8_t left, u_int8_t right);
@@ -236,6 +238,17 @@ void emulateOp8080(State8080* state) {
         case 0xf2: opJMPConditional(state, opCode, !state->codes.S); break;
         case 0xfa: opJMPConditional(state, opCode, state->codes.S); break;
 
+        // CALL etc
+        case 0xcd: opCALL(state, opCode); break;
+        case 0xc4: opCALLConditional(state, opCode, !state->codes.Z); break;
+        case 0xcc: opCALLConditional(state, opCode, state->codes.Z); break;
+        case 0xd4: opCALLConditional(state, opCode, !state->codes.CY); break;
+        case 0xdc: opCALLConditional(state, opCode, state->codes.CY); break;
+        case 0xe4: opCALLConditional(state, opCode, !state->codes.P); break;
+        case 0xec: opCALLConditional(state, opCode, state->codes.P); break;
+        case 0xf4: opCALLConditional(state, opCode, !state->codes.S); break;
+        case 0xfc: opCALLConditional(state, opCode, state->codes.S); break;
+
         // Branch Group
 
         case 0x02: UnimplementedInstruction(state); break;
@@ -366,52 +379,43 @@ void emulateOp8080(State8080* state) {
         case 0xbf: UnimplementedInstruction(state); break;
         case 0xc0: UnimplementedInstruction(state); break;
         case 0xc1: UnimplementedInstruction(state); break;
-        case 0xc4: UnimplementedInstruction(state); break;
         case 0xc5: UnimplementedInstruction(state); break;
         case 0xc7: UnimplementedInstruction(state); break;
         case 0xc8: UnimplementedInstruction(state); break;
         case 0xc9: UnimplementedInstruction(state); break;
         case 0xcb: UnimplementedInstruction(state); break;
-        case 0xcc: UnimplementedInstruction(state); break;
-        case 0xcd: UnimplementedInstruction(state); break;
         case 0xcf: UnimplementedInstruction(state); break;
         case 0xd0: UnimplementedInstruction(state); break;
         case 0xd1: UnimplementedInstruction(state); break;
         case 0xd3: UnimplementedInstruction(state); break;
-        case 0xd4: UnimplementedInstruction(state); break;
         case 0xd5: UnimplementedInstruction(state); break;
         case 0xd7: UnimplementedInstruction(state); break;
         case 0xd8: UnimplementedInstruction(state); break;
         case 0xd9: UnimplementedInstruction(state); break;
         case 0xdb: UnimplementedInstruction(state); break;
-        case 0xdc: UnimplementedInstruction(state); break;
         case 0xdd: UnimplementedInstruction(state); break;
         case 0xdf: UnimplementedInstruction(state); break;
         case 0xe0: UnimplementedInstruction(state); break;
         case 0xe1: UnimplementedInstruction(state); break;
         case 0xe3: UnimplementedInstruction(state); break;
-        case 0xe4: UnimplementedInstruction(state); break;
         case 0xe5: UnimplementedInstruction(state); break;
         case 0xe6: UnimplementedInstruction(state); break;
         case 0xe7: UnimplementedInstruction(state); break;
         case 0xe8: UnimplementedInstruction(state); break;
         case 0xe9: UnimplementedInstruction(state); break;
         case 0xeb: UnimplementedInstruction(state); break;
-        case 0xec: UnimplementedInstruction(state); break;
         case 0xed: UnimplementedInstruction(state); break;
         case 0xee: UnimplementedInstruction(state); break;
         case 0xef: UnimplementedInstruction(state); break;
         case 0xf0: UnimplementedInstruction(state); break;
         case 0xf1: UnimplementedInstruction(state); break;
         case 0xf3: UnimplementedInstruction(state); break;
-        case 0xf4: UnimplementedInstruction(state); break;
         case 0xf5: UnimplementedInstruction(state); break;
         case 0xf6: UnimplementedInstruction(state); break;
         case 0xf7: UnimplementedInstruction(state); break;
         case 0xf8: UnimplementedInstruction(state); break;
         case 0xf9: UnimplementedInstruction(state); break;
         case 0xfb: UnimplementedInstruction(state); break;
-        case 0xfc: UnimplementedInstruction(state); break;
         case 0xfd: UnimplementedInstruction(state); break;
         case 0xfe: UnimplementedInstruction(state); break;
         case 0xff: UnimplementedInstruction(state); break;
@@ -588,6 +592,25 @@ void opJMP(State8080* state, u_int8_t* opPointer) {
 void opJMPConditional(State8080* state, u_int8_t* opPointer, u_int8_t condition) {
     if (condition) {
         opJMP(state, opPointer);
+    } else {
+        state->PC += 2;
+    }
+}
+
+void opCALL(State8080* state, u_int8_t* opPointer) {
+    state->memory[state->SP-1] = (state->PC >> 8);
+    state->memory[state->SP-2] = (state->PC & 0xff);
+    state->SP -= 2;
+
+    state->PC = wordFromBytes(opPointer[2], opPointer[1]);
+
+    // account for PC auto-advance
+    state->PC -= 1;
+}
+
+void opCALLConditional(State8080* state, u_int8_t* opPointer, u_int8_t condition) {
+    if (condition) {
+        opCALL(state, opPointer);
     } else {
         state->PC += 2;
     }
