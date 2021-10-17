@@ -33,6 +33,7 @@ void emulateOp8080(State8080* state);
 
 void opLXI(State8080* state, u_int8_t* opPointer, u_int8_t* firstReg, u_int8_t* secondReg);
 void opLXI_sp(State8080* state, u_int8_t* opPointer);
+
 void opADD(State8080* state, u_int16_t addend);
 void opADI(State8080* state);
 void opADC(State8080* state, u_int16_t addend);
@@ -48,6 +49,10 @@ void opDCX(State8080* state, u_int8_t* firstReg, u_int8_t* secondReg);
 void opDAD(State8080* state, u_int8_t firstReg, u_int8_t secondReg);
 void opDAD_sp(State8080* state);
 void opDAA(State8080* state);
+
+void opANA(State8080* state, u_int8_t addend);
+void opANI(State8080* state);
+
 void opJMP(State8080* state, u_int8_t* opPointer);
 void opJMPConditional(State8080* state, u_int8_t* opPointer, u_int8_t condition);
 void opCALL(State8080* state, u_int8_t* opPointer);
@@ -58,6 +63,7 @@ void opRST(State8080* state, u_int8_t exp);
 void opPCHL(State8080* state);
 
 void pushPCToStack(State8080* state);
+u_int8_t dereferenceHL(State8080* state);
 u_int16_t getHLValue(State8080* state);
 u_int16_t wordFromBytes(u_int8_t left, u_int8_t right);
 u_int8_t getParity(u_int8_t value);
@@ -135,7 +141,7 @@ void emulateOp8080(State8080* state) {
         case 0x87: opADD(state, state->A); break;
 
         // ADD M
-        case 0x86: opADD(state, state->memory[getHLValue(state)]); break;
+        case 0x86: opADD(state, dereferenceHL(state)); break;
 
         // ADI
         case 0xc6: opADI(state); break;
@@ -150,7 +156,7 @@ void emulateOp8080(State8080* state) {
         case 0x8f: opADC(state, state->A); break;
 
         // ADC M
-        case 0x8e: opADC(state, state->memory[getHLValue(state)]); break;
+        case 0x8e: opADC(state, dereferenceHL(state)); break;
 
         // ACI
         case 0xce: opACI(state); break;
@@ -165,7 +171,7 @@ void emulateOp8080(State8080* state) {
         case 0x97: opSUB(state, state->A); break;
 
         // SUB M
-        case 0x96: opSUB(state, state->memory[getHLValue(state)]); break;
+        case 0x96: opSUB(state, dereferenceHL(state)); break;
 
         // SUI
         case 0xd6: opSUI(state); break;
@@ -180,7 +186,7 @@ void emulateOp8080(State8080* state) {
         case 0x9f: opSBB(state, state->A); break;
 
         // SBB M
-        case 0x9e: opSBB(state, state->memory[getHLValue(state)]); break;
+        case 0x9e: opSBB(state, dereferenceHL(state)); break;
 
         // SBI
         case 0xde: opSBI(state); break;
@@ -232,6 +238,22 @@ void emulateOp8080(State8080* state) {
 
         // Logical Group
 
+        // ANA
+        case 0xa0: opANA(state, state->B); break;
+        case 0xa1: opANA(state, state->C); break;
+        case 0xa2: opANA(state, state->D); break;
+        case 0xa3: opANA(state, state->E); break;
+        case 0xa4: opANA(state, state->H); break;
+        case 0xa5: opANA(state, state->L); break;
+        case 0xa7: opANA(state, state->A); break;
+
+        // ANA M
+        case 0xa6: opANA(state, dereferenceHL(state)); break;
+
+        // ANI
+        case 0xe6: opANI(state); break;
+
+
         // Branch Group
 
         // JMP etc
@@ -279,7 +301,6 @@ void emulateOp8080(State8080* state) {
 
         case 0xe9: opPCHL(state); break;
 
-        // Branch Group
 
         case 0x02: UnimplementedInstruction(state); break;
         case 0x06: UnimplementedInstruction(state); break;
@@ -654,10 +675,34 @@ void opPCHL(State8080* state) {
     state->PC -= 1;
 }
 
+void opANA(State8080* state, u_int8_t other) {
+    u_int8_t result = state->A & other;
+
+    state->codes.Z = (result == 0);
+    state->codes.S = ((result & 0x80) != 0);
+    state->codes.P = getParity(result);
+    state->codes.CY = 0;
+
+    state->A = result;
+}
+
+void opANI(State8080* state) {
+    u_int8_t nextByte = state->memory[state->PC+1];
+    opANA(state, nextByte);
+    state->PC += 1;
+}
+
+
+// Utilities
+
 void pushPCToStack(State8080* state) {
     state->memory[state->SP-1] = (state->PC >> 8);
     state->memory[state->SP-2] = (state->PC & 0xff);
     state->SP -= 2;
+}
+
+u_int8_t dereferenceHL(State8080* state) {
+    return state->memory[getHLValue(state)];
 }
 
 u_int16_t getHLValue(State8080* state) {
