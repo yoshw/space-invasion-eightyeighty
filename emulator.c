@@ -54,7 +54,10 @@ void opCALL(State8080* state, u_int8_t* opPointer);
 void opCALLConditional(State8080* state, u_int8_t* opPointer, u_int8_t condition);
 void opRET(State8080* state);
 void opRETConditional(State8080* state, u_int8_t condition);
+void opRST(State8080* state, u_int8_t exp);
+void opPCHL(State8080* state);
 
+void pushPCToStack(State8080* state);
 u_int16_t getHLValue(State8080* state);
 u_int16_t wordFromBytes(u_int8_t left, u_int8_t right);
 u_int8_t getParity(u_int8_t value);
@@ -229,6 +232,8 @@ void emulateOp8080(State8080* state) {
 
         // Logical Group
 
+        // Branch Group
+
         // JMP etc
         case 0xc3: opJMP(state, opCode); break;
         case 0xc2: opJMPConditional(state, opCode, !state->codes.Z); break;
@@ -261,6 +266,18 @@ void emulateOp8080(State8080* state) {
         case 0xe8: opRETConditional(state, state->codes.P); break;
         case 0xf0: opRETConditional(state, !state->codes.S); break;
         case 0xf8: opRETConditional(state, state->codes.S); break;
+
+        // RST
+        case 0xc7: opRST(state, 0); break;
+        case 0xcf: opRST(state, 1); break;
+        case 0xd7: opRST(state, 2); break;
+        case 0xdf: opRST(state, 3); break;
+        case 0xe7: opRST(state, 4); break;
+        case 0xef: opRST(state, 5); break;
+        case 0xf7: opRST(state, 6); break;
+        case 0xff: opRST(state, 7); break;
+
+        case 0xe9: opPCHL(state); break;
 
         // Branch Group
 
@@ -392,37 +409,28 @@ void emulateOp8080(State8080* state) {
         case 0xbf: UnimplementedInstruction(state); break;
         case 0xc1: UnimplementedInstruction(state); break;
         case 0xc5: UnimplementedInstruction(state); break;
-        case 0xc7: UnimplementedInstruction(state); break;
         case 0xcb: UnimplementedInstruction(state); break;
-        case 0xcf: UnimplementedInstruction(state); break;
         case 0xd1: UnimplementedInstruction(state); break;
         case 0xd3: UnimplementedInstruction(state); break;
         case 0xd5: UnimplementedInstruction(state); break;
-        case 0xd7: UnimplementedInstruction(state); break;
         case 0xd9: UnimplementedInstruction(state); break;
         case 0xdb: UnimplementedInstruction(state); break;
         case 0xdd: UnimplementedInstruction(state); break;
-        case 0xdf: UnimplementedInstruction(state); break;
         case 0xe1: UnimplementedInstruction(state); break;
         case 0xe3: UnimplementedInstruction(state); break;
         case 0xe5: UnimplementedInstruction(state); break;
         case 0xe6: UnimplementedInstruction(state); break;
-        case 0xe7: UnimplementedInstruction(state); break;
-        case 0xe9: UnimplementedInstruction(state); break;
         case 0xeb: UnimplementedInstruction(state); break;
         case 0xed: UnimplementedInstruction(state); break;
         case 0xee: UnimplementedInstruction(state); break;
-        case 0xef: UnimplementedInstruction(state); break;
         case 0xf1: UnimplementedInstruction(state); break;
         case 0xf3: UnimplementedInstruction(state); break;
         case 0xf5: UnimplementedInstruction(state); break;
         case 0xf6: UnimplementedInstruction(state); break;
-        case 0xf7: UnimplementedInstruction(state); break;
         case 0xf9: UnimplementedInstruction(state); break;
         case 0xfb: UnimplementedInstruction(state); break;
         case 0xfd: UnimplementedInstruction(state); break;
         case 0xfe: UnimplementedInstruction(state); break;
-        case 0xff: UnimplementedInstruction(state); break;
 
         // Stack, I/O, and Machine Control group
         case 0x00: break; // NOP
@@ -602,9 +610,7 @@ void opJMPConditional(State8080* state, u_int8_t* opPointer, u_int8_t condition)
 }
 
 void opCALL(State8080* state, u_int8_t* opPointer) {
-    state->memory[state->SP-1] = (state->PC >> 8);
-    state->memory[state->SP-2] = (state->PC & 0xff);
-    state->SP -= 2;
+    pushPCToStack(state);
 
     state->PC = wordFromBytes(opPointer[2], opPointer[1]);
 
@@ -632,6 +638,26 @@ void opRETConditional(State8080* state, u_int8_t condition) {
     if (condition) {
         opRET(state);
     }
+}
+
+void opRST(State8080* state, u_int8_t exp) {
+    pushPCToStack(state);
+
+    state->PC = exp * 8;
+
+    // account for PC auto-advance
+    state->PC -= 1;
+}
+
+void opPCHL(State8080* state) {
+    state->PC = getHLValue(state);
+    state->PC -= 1;
+}
+
+void pushPCToStack(State8080* state) {
+    state->memory[state->SP-1] = (state->PC >> 8);
+    state->memory[state->SP-2] = (state->PC & 0xff);
+    state->SP -= 2;
 }
 
 u_int16_t getHLValue(State8080* state) {
