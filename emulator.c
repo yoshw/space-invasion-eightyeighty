@@ -37,6 +37,10 @@ void opMOV(u_int8_t* destAddr, u_int8_t* srcAddr);
 void opMVI(State8080* state, u_int8_t* dest);
 void opLXI(State8080* state, u_int8_t* opPointer, u_int8_t* firstReg, u_int8_t* secondReg);
 void opLXI_sp(State8080* state, u_int8_t* opPointer);
+void opLDA(State8080* state);
+void opSTA(State8080* state);
+void opLHLD(State8080* state);
+void opSHLD(State8080* state);
 
 void opADD(State8080* state, u_int16_t addend);
 void opADI(State8080* state);
@@ -215,15 +219,13 @@ void emulateOp8080(State8080* state) {
         case 0x21: opLXI(state, opCode, &state->H, &state->L); break;
         case 0x31: opLXI_sp(state, opCode); break;
 
-        // case 0x3a: printf("LDA    A <- ($%02x%02x)", codeAddress[2], codeAddress[1]); opBytes=3; break;
-        // case 0x32: printf("STA    ($%02x%02x) <- A", codeAddress[2], codeAddress[1]); opBytes=3; break;
-
-        // case 0x2a: printf("LHLD   L <- ($%02x%02x), H <- ($%02x%02x)", codeAddress[2], codeAddress[1], codeAddress[2], codeAddress[1]+1); opBytes=3; break;
-        // case 0x22: printf("SHLD   ($%02x%02x) <- L, ($%02x%02x) <- H", codeAddress[2], codeAddress[1], codeAddress[2], codeAddress[1]+1); opBytes=3; break;
+        case 0x3a: opLDA(state); break;
+        case 0x32: opSTA(state); break;
+        case 0x2a: opLHLD(state); break;
+        case 0x22: opSHLD(state); break;
 
         // case 0x0a: printf("LDAX   A <- (B-C) "); break;
         // case 0x1a: printf("LDAX   A <- (D-E) "); break;
-
         // case 0x02: printf("STAX   (B-C) <- A"); break;
         // case 0x12: printf("STAX   (D-E) <- A"); break;
 
@@ -506,13 +508,9 @@ void emulateOp8080(State8080* state) {
         case 0x18: UnimplementedInstruction(state); break;
         case 0x1a: UnimplementedInstruction(state); break;
         case 0x20: UnimplementedInstruction(state); break;
-        case 0x22: UnimplementedInstruction(state); break;
         case 0x28: UnimplementedInstruction(state); break;
-        case 0x2a: UnimplementedInstruction(state); break;
         case 0x30: UnimplementedInstruction(state); break;
-        case 0x32: UnimplementedInstruction(state); break;
         case 0x38: UnimplementedInstruction(state); break;
-        case 0x3a: UnimplementedInstruction(state); break;
         case 0x76: UnimplementedInstruction(state); break;
         case 0xc1: UnimplementedInstruction(state); break;
         case 0xc5: UnimplementedInstruction(state); break;
@@ -570,6 +568,32 @@ void opLXI(State8080* state, u_int8_t* opPointer, u_int8_t* firstReg, u_int8_t* 
 void opLXI_sp(State8080* state, u_int8_t* opPointer) {
     u_int16_t combinedValue = wordFromBytes(opPointer[2], opPointer[1]);
     state->SP = combinedValue;
+    state->PC += 2;
+}
+
+void opLDA(State8080* state) {
+    u_int16_t addr = wordFromBytes(state->PC+2, state->PC+1);
+    state->A = state->memory[addr];
+    state->PC += 2;
+}
+
+void opSTA(State8080* state) {
+    u_int16_t addr = wordFromBytes(state->PC+2, state->PC+1);
+    state->memory[addr] = state->A;
+    state->PC += 2;
+}
+
+void opLHLD(State8080* state) {
+    u_int16_t firstAddr = wordFromBytes(state->PC+2, state->PC+1);
+    state->L = state->memory[firstAddr];
+    state->H = state->memory[firstAddr+1];
+    state->PC += 2;
+}
+
+void opSHLD(State8080* state) {
+    u_int16_t firstAddr = wordFromBytes(state->PC+2, state->PC+1);
+    state->memory[firstAddr] = state->L;
+    state->memory[firstAddr+1] = state->H;
     state->PC += 2;
 }
 
