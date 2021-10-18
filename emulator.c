@@ -50,8 +50,14 @@ void opDAD(State8080* state, u_int8_t firstReg, u_int8_t secondReg);
 void opDAD_sp(State8080* state);
 void opDAA(State8080* state);
 
-void opANA(State8080* state, u_int8_t addend);
+void opANA(State8080* state, u_int8_t operand);
 void opANI(State8080* state);
+void opXRA(State8080* state, u_int8_t operand);
+void opXRI(State8080* state);
+void opORA(State8080* state, u_int8_t operand);
+void opORI(State8080* state);
+void opCMP(State8080* state, u_int8_t operand);
+void opCPI(State8080* state);
 
 void opJMP(State8080* state, u_int8_t* opPointer);
 void opJMPConditional(State8080* state, u_int8_t* opPointer, u_int8_t condition);
@@ -254,6 +260,101 @@ void emulateOp8080(State8080* state) {
         case 0xe6: opANI(state); break;
 
 
+        // XRA
+        case 0xa8: opXRA(state, state->B); break;
+        case 0xa9: opXRA(state, state->C); break;
+        case 0xaa: opXRA(state, state->D); break;
+        case 0xab: opXRA(state, state->E); break;
+        case 0xac: opXRA(state, state->H); break;
+        case 0xad: opXRA(state, state->L); break;
+        case 0xaf: opXRA(state, state->A); break;
+
+        // XRA M
+        case 0xae: opXRA(state, dereferenceHL(state)); break;
+
+        // XRI
+        case 0xee: opXRI(state); break;
+
+
+        // ORA
+        case 0xb0: opORA(state, state->B); break;
+        case 0xb1: opORA(state, state->C); break;
+        case 0xb2: opORA(state, state->D); break;
+        case 0xb3: opORA(state, state->E); break;
+        case 0xb4: opORA(state, state->H); break;
+        case 0xb5: opORA(state, state->L); break;
+        case 0xb7: opORA(state, state->A); break;
+
+        // ORA M
+        case 0xb6: opORA(state, dereferenceHL(state)); break;
+
+        // ORI
+        case 0xf6: opORI(state); break;
+
+
+        // CMP
+        case 0xb8: opCMP(state, state->B); break;
+        case 0xb9: opCMP(state, state->C); break;
+        case 0xba: opCMP(state, state->D); break;
+        case 0xbb: opCMP(state, state->E); break;
+        case 0xbc: opCMP(state, state->H); break;
+        case 0xbd: opCMP(state, state->L); break;
+        case 0xbf: opCMP(state, state->A); break;
+
+        // CMP M
+        case 0xbe: opCMP(state, dereferenceHL(state)); break;
+
+        // CPI
+        case 0xfe: opCPI(state); break;
+
+        // RLC
+        case 0x07: {
+            u_int8_t tmp = state->A;
+            state->A = (tmp << 1 | tmp >> 7);
+            state->codes.CY = tmp >> 7;
+            break;
+        }
+
+        // RRC
+        case 0x0f: {
+            u_int8_t tmp = state->A;
+            state->A = (tmp >> 1 | tmp << 7);
+            state->codes.CY = tmp & 1;
+            break;
+        }
+
+        // RAL
+        case 0x17: {
+            u_int8_t tmp = state->A;
+            state->A = (tmp << 1 | state->codes.CY);
+            state->codes.CY = tmp >> 7;
+            break;
+        }
+
+        // RAR
+        case 0x1f: {
+            u_int8_t tmp = state->A;
+            state->A = (tmp >> 1 | state->codes.CY << 7);
+            state->codes.CY = tmp & 1;
+            break;
+        }
+
+        // CMA
+        case 0x2f: {
+            state->A = ~state->A;
+            break;
+        }
+        // CMC
+        case 0x3f: {
+            state->codes.CY = ~state->codes.CY;
+            break;
+        }
+        // STC
+        case 0x37: {
+            state->codes.CY = 1;
+            break;
+        }
+        
         // Branch Group
 
         // JMP etc
@@ -304,34 +405,27 @@ void emulateOp8080(State8080* state) {
 
         case 0x02: UnimplementedInstruction(state); break;
         case 0x06: UnimplementedInstruction(state); break;
-        case 0x07: UnimplementedInstruction(state); break;
         case 0x08: UnimplementedInstruction(state); break;
         case 0x0a: UnimplementedInstruction(state); break;
         case 0x0e: UnimplementedInstruction(state); break;
-        case 0x0f: UnimplementedInstruction(state); break;
         case 0x10: UnimplementedInstruction(state); break;
         case 0x12: UnimplementedInstruction(state); break;
         case 0x16: UnimplementedInstruction(state); break;
-        case 0x17: UnimplementedInstruction(state); break;
         case 0x18: UnimplementedInstruction(state); break;
         case 0x1a: UnimplementedInstruction(state); break;
         case 0x1e: UnimplementedInstruction(state); break;
-        case 0x1f: UnimplementedInstruction(state); break;
         case 0x20: UnimplementedInstruction(state); break;
         case 0x22: UnimplementedInstruction(state); break;
         case 0x26: UnimplementedInstruction(state); break;
         case 0x28: UnimplementedInstruction(state); break;
         case 0x2a: UnimplementedInstruction(state); break;
         case 0x2e: UnimplementedInstruction(state); break;
-        case 0x2f: UnimplementedInstruction(state); break;
         case 0x30: UnimplementedInstruction(state); break;
         case 0x32: UnimplementedInstruction(state); break;
         case 0x36: UnimplementedInstruction(state); break;
-        case 0x37: UnimplementedInstruction(state); break;
         case 0x38: UnimplementedInstruction(state); break;
         case 0x3a: UnimplementedInstruction(state); break;
         case 0x3e: UnimplementedInstruction(state); break;
-        case 0x3f: UnimplementedInstruction(state); break;
         case 0x40: UnimplementedInstruction(state); break;
         case 0x41: UnimplementedInstruction(state); break;
         case 0x42: UnimplementedInstruction(state); break;
@@ -396,38 +490,6 @@ void emulateOp8080(State8080* state) {
         case 0x7d: UnimplementedInstruction(state); break;
         case 0x7e: UnimplementedInstruction(state); break;
         case 0x7f: UnimplementedInstruction(state); break;
-        case 0xa0: UnimplementedInstruction(state); break;
-        case 0xa1: UnimplementedInstruction(state); break;
-        case 0xa2: UnimplementedInstruction(state); break;
-        case 0xa3: UnimplementedInstruction(state); break;
-        case 0xa4: UnimplementedInstruction(state); break;
-        case 0xa5: UnimplementedInstruction(state); break;
-        case 0xa6: UnimplementedInstruction(state); break;
-        case 0xa7: UnimplementedInstruction(state); break;
-        case 0xa8: UnimplementedInstruction(state); break;
-        case 0xa9: UnimplementedInstruction(state); break;
-        case 0xaa: UnimplementedInstruction(state); break;
-        case 0xab: UnimplementedInstruction(state); break;
-        case 0xac: UnimplementedInstruction(state); break;
-        case 0xad: UnimplementedInstruction(state); break;
-        case 0xae: UnimplementedInstruction(state); break;
-        case 0xaf: UnimplementedInstruction(state); break;
-        case 0xb0: UnimplementedInstruction(state); break;
-        case 0xb1: UnimplementedInstruction(state); break;
-        case 0xb2: UnimplementedInstruction(state); break;
-        case 0xb3: UnimplementedInstruction(state); break;
-        case 0xb4: UnimplementedInstruction(state); break;
-        case 0xb5: UnimplementedInstruction(state); break;
-        case 0xb6: UnimplementedInstruction(state); break;
-        case 0xb7: UnimplementedInstruction(state); break;
-        case 0xb8: UnimplementedInstruction(state); break;
-        case 0xb9: UnimplementedInstruction(state); break;
-        case 0xba: UnimplementedInstruction(state); break;
-        case 0xbb: UnimplementedInstruction(state); break;
-        case 0xbc: UnimplementedInstruction(state); break;
-        case 0xbd: UnimplementedInstruction(state); break;
-        case 0xbe: UnimplementedInstruction(state); break;
-        case 0xbf: UnimplementedInstruction(state); break;
         case 0xc1: UnimplementedInstruction(state); break;
         case 0xc5: UnimplementedInstruction(state); break;
         case 0xcb: UnimplementedInstruction(state); break;
@@ -440,18 +502,14 @@ void emulateOp8080(State8080* state) {
         case 0xe1: UnimplementedInstruction(state); break;
         case 0xe3: UnimplementedInstruction(state); break;
         case 0xe5: UnimplementedInstruction(state); break;
-        case 0xe6: UnimplementedInstruction(state); break;
         case 0xeb: UnimplementedInstruction(state); break;
         case 0xed: UnimplementedInstruction(state); break;
-        case 0xee: UnimplementedInstruction(state); break;
         case 0xf1: UnimplementedInstruction(state); break;
         case 0xf3: UnimplementedInstruction(state); break;
         case 0xf5: UnimplementedInstruction(state); break;
-        case 0xf6: UnimplementedInstruction(state); break;
         case 0xf9: UnimplementedInstruction(state); break;
         case 0xfb: UnimplementedInstruction(state); break;
         case 0xfd: UnimplementedInstruction(state); break;
-        case 0xfe: UnimplementedInstruction(state); break;
 
         // Stack, I/O, and Machine Control group
         case 0x00: break; // NOP
@@ -675,8 +733,8 @@ void opPCHL(State8080* state) {
     state->PC -= 1;
 }
 
-void opANA(State8080* state, u_int8_t other) {
-    u_int8_t result = state->A & other;
+void opANA(State8080* state, u_int8_t operand) {
+    u_int8_t result = state->A & operand;
 
     state->codes.Z = (result == 0);
     state->codes.S = ((result & 0x80) != 0);
@@ -692,6 +750,59 @@ void opANI(State8080* state) {
     state->PC += 1;
 }
 
+void opXRA(State8080* state, u_int8_t operand) {
+    u_int8_t result = state->A ^ operand;
+
+    state->codes.Z = (result == 0);
+    state->codes.S = ((result & 0x80) != 0);
+    state->codes.P = getParity(result);
+    state->codes.CY = 0;
+
+    state->A = result;
+}
+
+void opXRI(State8080* state) {
+    u_int8_t nextByte = state->memory[state->PC+1];
+    opXRA(state, nextByte);
+    state->PC += 1;
+}
+
+void opORA(State8080* state, u_int8_t operand) {
+    u_int8_t result = state->A | operand;
+
+    state->codes.Z = (result == 0);
+    state->codes.S = ((result & 0x80) != 0);
+    state->codes.P = getParity(result);
+    state->codes.CY = 0;
+
+    state->A = result;
+}
+
+void opORI(State8080* state) {
+    u_int8_t nextByte = state->memory[state->PC+1];
+    opORA(state, nextByte);
+    state->PC += 1;
+}
+
+/**
+ * Identical to SUB, except result is not stored
+ */
+void opCMP(State8080* state, u_int8_t operand) {
+    u_int16_t result = (u_int16_t) state->A - (u_int16_t) operand;
+    u_int8_t resultTruncated = result & 0xff;
+
+    state->codes.Z = (resultTruncated == 0);
+    state->codes.S = ((result & 0x80) != 0);
+    state->codes.P = getParity(resultTruncated);
+    // carry out of high-order bit indicates no borrow occurred, meaning Carry is reset
+    state->codes.CY = result <= 0xff;
+}
+
+void opCPI(State8080* state) {
+    u_int8_t nextByte = state->memory[state->PC+1];
+    opCMP(state, nextByte);
+    state->PC += 1;
+}
 
 // Utilities
 
