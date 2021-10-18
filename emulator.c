@@ -23,6 +23,8 @@ typedef struct {
     u_int16_t   SP;
     u_int16_t   PC;
 
+    // Assumption: we can address bytes in this memory map using u_int16_t values (stored in registers)
+    // This is not guaranteed to be true on any given architecture. Consider using a map of u_int16_t -> u_int8_t instead.
     u_int8_t*      memory;
     ConditionCodes codes;
     u_int8_t       int_enable;
@@ -31,6 +33,8 @@ typedef struct {
 int emulate8080(FILE *f);
 void emulateOp8080(State8080* state);
 
+void opMOV(u_int8_t* destAddr, u_int8_t* srcAddr);
+void opMVI(State8080* state, u_int8_t* dest);
 void opLXI(State8080* state, u_int8_t* opPointer, u_int8_t* firstReg, u_int8_t* secondReg);
 void opLXI_sp(State8080* state, u_int8_t* opPointer);
 
@@ -128,11 +132,102 @@ void emulateOp8080(State8080* state) {
     switch(*opCode) {
         // Data Transfer Group
 
+        // MOV
+        case 0x40: opMOV(&state->B, &state->B); break;
+        case 0x41: opMOV(&state->B, &state->C); break;
+        case 0x42: opMOV(&state->B, &state->D); break;
+        case 0x43: opMOV(&state->B, &state->E); break;
+        case 0x44: opMOV(&state->B, &state->H); break;
+        case 0x45: opMOV(&state->B, &state->L); break;
+        case 0x47: opMOV(&state->B, &state->A); break;
+        case 0x48: opMOV(&state->C, &state->B); break;
+        case 0x49: opMOV(&state->C, &state->C); break;
+        case 0x4a: opMOV(&state->C, &state->D); break;
+        case 0x4b: opMOV(&state->C, &state->E); break;
+        case 0x4c: opMOV(&state->C, &state->H); break;
+        case 0x4d: opMOV(&state->C, &state->L); break;
+        case 0x4f: opMOV(&state->C, &state->A); break;
+        case 0x50: opMOV(&state->D, &state->B); break;
+        case 0x51: opMOV(&state->D, &state->C); break;
+        case 0x52: opMOV(&state->D, &state->D); break;
+        case 0x53: opMOV(&state->D, &state->E); break;
+        case 0x54: opMOV(&state->D, &state->H); break;
+        case 0x55: opMOV(&state->D, &state->L); break;
+        case 0x57: opMOV(&state->D, &state->A); break;
+        case 0x58: opMOV(&state->E, &state->B); break;
+        case 0x59: opMOV(&state->E, &state->C); break;
+        case 0x5a: opMOV(&state->E, &state->D); break;
+        case 0x5b: opMOV(&state->E, &state->E); break;
+        case 0x5c: opMOV(&state->E, &state->H); break;
+        case 0x5d: opMOV(&state->E, &state->L); break;
+        case 0x5f: opMOV(&state->E, &state->A); break;
+        case 0x60: opMOV(&state->H, &state->B); break;
+        case 0x61: opMOV(&state->H, &state->C); break;
+        case 0x62: opMOV(&state->H, &state->D); break;
+        case 0x63: opMOV(&state->H, &state->E); break;
+        case 0x64: opMOV(&state->H, &state->H); break;
+        case 0x65: opMOV(&state->H, &state->L); break;
+        case 0x67: opMOV(&state->H, &state->A); break;
+        case 0x68: opMOV(&state->L, &state->B); break;
+        case 0x69: opMOV(&state->L, &state->C); break;
+        case 0x6a: opMOV(&state->L, &state->D); break;
+        case 0x6b: opMOV(&state->L, &state->E); break;
+        case 0x6c: opMOV(&state->L, &state->H); break;
+        case 0x6d: opMOV(&state->L, &state->L); break;
+        case 0x6f: opMOV(&state->L, &state->A); break;
+        case 0x78: opMOV(&state->A, &state->B); break;
+        case 0x79: opMOV(&state->A, &state->C); break;
+        case 0x7a: opMOV(&state->A, &state->D); break;
+        case 0x7b: opMOV(&state->A, &state->E); break;
+        case 0x7c: opMOV(&state->A, &state->H); break;
+        case 0x7d: opMOV(&state->A, &state->L); break;
+        case 0x7f: opMOV(&state->A, &state->A); break;
+
+        case 0x46: opMOV(&state->B, (u_int8_t*) getHLValue(state)); break;
+        case 0x4e: opMOV(&state->C, (u_int8_t*) getHLValue(state)); break;
+        case 0x56: opMOV(&state->D, (u_int8_t*) getHLValue(state)); break;
+        case 0x5e: opMOV(&state->E, (u_int8_t*) getHLValue(state)); break;
+        case 0x66: opMOV(&state->H, (u_int8_t*) getHLValue(state)); break;
+        case 0x6e: opMOV(&state->L, (u_int8_t*) getHLValue(state)); break;
+        case 0x7e: opMOV(&state->A, (u_int8_t*) getHLValue(state)); break;
+
+        case 0x70: opMOV((u_int8_t*) getHLValue(state), &state->B); break;
+        case 0x71: opMOV((u_int8_t*) getHLValue(state), &state->C); break;
+        case 0x72: opMOV((u_int8_t*) getHLValue(state), &state->D); break;
+        case 0x73: opMOV((u_int8_t*) getHLValue(state), &state->E); break;
+        case 0x74: opMOV((u_int8_t*) getHLValue(state), &state->H); break;
+        case 0x75: opMOV((u_int8_t*) getHLValue(state), &state->L); break;
+        case 0x77: opMOV((u_int8_t*) getHLValue(state), &state->A); break;
+
+        case 0x06: opMVI(state, &state->B); break;
+        case 0x0e: opMVI(state, &state->C); break;
+        case 0x16: opMVI(state, &state->D); break;
+        case 0x1e: opMVI(state, &state->E); break;
+        case 0x26: opMVI(state, &state->H); break;
+        case 0x2e: opMVI(state, &state->L); break;
+        case 0x3e: opMVI(state, &state->A); break;
+
+        case 0x36: opMVI(state, (u_int8_t*) getHLValue(state)); break;
+
         // LXI
         case 0x01: opLXI(state, opCode, &state->B, &state->C); break;
         case 0x11: opLXI(state, opCode, &state->D, &state->E); break;
         case 0x21: opLXI(state, opCode, &state->H, &state->L); break;
         case 0x31: opLXI_sp(state, opCode); break;
+
+        // case 0x3a: printf("LDA    A <- ($%02x%02x)", codeAddress[2], codeAddress[1]); opBytes=3; break;
+        // case 0x32: printf("STA    ($%02x%02x) <- A", codeAddress[2], codeAddress[1]); opBytes=3; break;
+
+        // case 0x2a: printf("LHLD   L <- ($%02x%02x), H <- ($%02x%02x)", codeAddress[2], codeAddress[1], codeAddress[2], codeAddress[1]+1); opBytes=3; break;
+        // case 0x22: printf("SHLD   ($%02x%02x) <- L, ($%02x%02x) <- H", codeAddress[2], codeAddress[1], codeAddress[2], codeAddress[1]+1); opBytes=3; break;
+
+        // case 0x0a: printf("LDAX   A <- (B-C) "); break;
+        // case 0x1a: printf("LDAX   A <- (D-E) "); break;
+
+        // case 0x02: printf("STAX   (B-C) <- A"); break;
+        // case 0x12: printf("STAX   (D-E) <- A"); break;
+
+        // case 0xeb: printf("XCHG   H-L <-> D-E"); break;
 
 
         // Arithmetic Group
@@ -404,92 +499,21 @@ void emulateOp8080(State8080* state) {
 
 
         case 0x02: UnimplementedInstruction(state); break;
-        case 0x06: UnimplementedInstruction(state); break;
         case 0x08: UnimplementedInstruction(state); break;
         case 0x0a: UnimplementedInstruction(state); break;
-        case 0x0e: UnimplementedInstruction(state); break;
         case 0x10: UnimplementedInstruction(state); break;
         case 0x12: UnimplementedInstruction(state); break;
-        case 0x16: UnimplementedInstruction(state); break;
         case 0x18: UnimplementedInstruction(state); break;
         case 0x1a: UnimplementedInstruction(state); break;
-        case 0x1e: UnimplementedInstruction(state); break;
         case 0x20: UnimplementedInstruction(state); break;
         case 0x22: UnimplementedInstruction(state); break;
-        case 0x26: UnimplementedInstruction(state); break;
         case 0x28: UnimplementedInstruction(state); break;
         case 0x2a: UnimplementedInstruction(state); break;
-        case 0x2e: UnimplementedInstruction(state); break;
         case 0x30: UnimplementedInstruction(state); break;
         case 0x32: UnimplementedInstruction(state); break;
-        case 0x36: UnimplementedInstruction(state); break;
         case 0x38: UnimplementedInstruction(state); break;
         case 0x3a: UnimplementedInstruction(state); break;
-        case 0x3e: UnimplementedInstruction(state); break;
-        case 0x40: UnimplementedInstruction(state); break;
-        case 0x41: UnimplementedInstruction(state); break;
-        case 0x42: UnimplementedInstruction(state); break;
-        case 0x43: UnimplementedInstruction(state); break;
-        case 0x44: UnimplementedInstruction(state); break;
-        case 0x45: UnimplementedInstruction(state); break;
-        case 0x46: UnimplementedInstruction(state); break;
-        case 0x47: UnimplementedInstruction(state); break;
-        case 0x48: UnimplementedInstruction(state); break;
-        case 0x49: UnimplementedInstruction(state); break;
-        case 0x4a: UnimplementedInstruction(state); break;
-        case 0x4b: UnimplementedInstruction(state); break;
-        case 0x4c: UnimplementedInstruction(state); break;
-        case 0x4d: UnimplementedInstruction(state); break;
-        case 0x4e: UnimplementedInstruction(state); break;
-        case 0x4f: UnimplementedInstruction(state); break;
-        case 0x50: UnimplementedInstruction(state); break;
-        case 0x51: UnimplementedInstruction(state); break;
-        case 0x52: UnimplementedInstruction(state); break;
-        case 0x53: UnimplementedInstruction(state); break;
-        case 0x54: UnimplementedInstruction(state); break;
-        case 0x55: UnimplementedInstruction(state); break;
-        case 0x56: UnimplementedInstruction(state); break;
-        case 0x57: UnimplementedInstruction(state); break;
-        case 0x58: UnimplementedInstruction(state); break;
-        case 0x59: UnimplementedInstruction(state); break;
-        case 0x5a: UnimplementedInstruction(state); break;
-        case 0x5b: UnimplementedInstruction(state); break;
-        case 0x5c: UnimplementedInstruction(state); break;
-        case 0x5d: UnimplementedInstruction(state); break;
-        case 0x5e: UnimplementedInstruction(state); break;
-        case 0x5f: UnimplementedInstruction(state); break;
-        case 0x60: UnimplementedInstruction(state); break;
-        case 0x61: UnimplementedInstruction(state); break;
-        case 0x62: UnimplementedInstruction(state); break;
-        case 0x63: UnimplementedInstruction(state); break;
-        case 0x64: UnimplementedInstruction(state); break;
-        case 0x65: UnimplementedInstruction(state); break;
-        case 0x66: UnimplementedInstruction(state); break;
-        case 0x67: UnimplementedInstruction(state); break;
-        case 0x68: UnimplementedInstruction(state); break;
-        case 0x69: UnimplementedInstruction(state); break;
-        case 0x6a: UnimplementedInstruction(state); break;
-        case 0x6b: UnimplementedInstruction(state); break;
-        case 0x6c: UnimplementedInstruction(state); break;
-        case 0x6d: UnimplementedInstruction(state); break;
-        case 0x6e: UnimplementedInstruction(state); break;
-        case 0x6f: UnimplementedInstruction(state); break;
-        case 0x70: UnimplementedInstruction(state); break;
-        case 0x71: UnimplementedInstruction(state); break;
-        case 0x72: UnimplementedInstruction(state); break;
-        case 0x73: UnimplementedInstruction(state); break;
-        case 0x74: UnimplementedInstruction(state); break;
-        case 0x75: UnimplementedInstruction(state); break;
         case 0x76: UnimplementedInstruction(state); break;
-        case 0x77: UnimplementedInstruction(state); break;
-        case 0x78: UnimplementedInstruction(state); break;
-        case 0x79: UnimplementedInstruction(state); break;
-        case 0x7a: UnimplementedInstruction(state); break;
-        case 0x7b: UnimplementedInstruction(state); break;
-        case 0x7c: UnimplementedInstruction(state); break;
-        case 0x7d: UnimplementedInstruction(state); break;
-        case 0x7e: UnimplementedInstruction(state); break;
-        case 0x7f: UnimplementedInstruction(state); break;
         case 0xc1: UnimplementedInstruction(state); break;
         case 0xc5: UnimplementedInstruction(state); break;
         case 0xcb: UnimplementedInstruction(state); break;
@@ -524,6 +548,17 @@ void emulateOp8080(State8080* state) {
     printf("    A $%02x | B $%02x C $%02x | D $%02x E $%02x | H $%02x L $%02x\n",
         state->A, state->B, state->C, state->D, state->E, state->H, state->L);
     printf("    SP $%04x\n\n", state->SP);
+}
+
+// Operation functions
+
+void opMOV(u_int8_t* destAddr, u_int8_t* srcAddr) {
+    *destAddr = *srcAddr;
+}
+
+void opMVI(State8080* state, u_int8_t* dest) {
+    u_int8_t nextByte = state->memory[state->PC+1];
+    *dest = nextByte;
 }
 
 void opLXI(State8080* state, u_int8_t* opPointer, u_int8_t* firstReg, u_int8_t* secondReg) {
