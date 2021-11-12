@@ -41,6 +41,9 @@ void opLDA(State8080* state);
 void opSTA(State8080* state);
 void opLHLD(State8080* state);
 void opSHLD(State8080* state);
+void opLDAX(State8080* state, u_int8_t* firstReg, u_int8_t* secondReg);
+void opSTAX(State8080* state, u_int8_t* firstReg, u_int8_t* secondReg);
+void opXCHG(State8080* state);
 
 void opADD(State8080* state, u_int16_t addend);
 void opADI(State8080* state);
@@ -223,13 +226,12 @@ void emulateOp8080(State8080* state) {
         case 0x32: opSTA(state); break;
         case 0x2a: opLHLD(state); break;
         case 0x22: opSHLD(state); break;
+        case 0x0a: opLDAX(state, &state->B, &state->C); break;
+        case 0x1a: opLDAX(state, &state->D, &state->E); break;
+        case 0x02: opSTAX(state, &state->B, &state->C); break;
+        case 0x12: opSTAX(state, &state->D, &state->E); break;
 
-        // case 0x0a: printf("LDAX   A <- (B-C) "); break;
-        // case 0x1a: printf("LDAX   A <- (D-E) "); break;
-        // case 0x02: printf("STAX   (B-C) <- A"); break;
-        // case 0x12: printf("STAX   (D-E) <- A"); break;
-
-        // case 0xeb: printf("XCHG   H-L <-> D-E"); break;
+        case 0xeb: opXCHG(state); break;
 
 
         // Arithmetic Group
@@ -500,13 +502,9 @@ void emulateOp8080(State8080* state) {
         case 0xe9: opPCHL(state); break;
 
 
-        case 0x02: UnimplementedInstruction(state); break;
         case 0x08: UnimplementedInstruction(state); break;
-        case 0x0a: UnimplementedInstruction(state); break;
         case 0x10: UnimplementedInstruction(state); break;
-        case 0x12: UnimplementedInstruction(state); break;
         case 0x18: UnimplementedInstruction(state); break;
-        case 0x1a: UnimplementedInstruction(state); break;
         case 0x20: UnimplementedInstruction(state); break;
         case 0x28: UnimplementedInstruction(state); break;
         case 0x30: UnimplementedInstruction(state); break;
@@ -524,7 +522,6 @@ void emulateOp8080(State8080* state) {
         case 0xe1: UnimplementedInstruction(state); break;
         case 0xe3: UnimplementedInstruction(state); break;
         case 0xe5: UnimplementedInstruction(state); break;
-        case 0xeb: UnimplementedInstruction(state); break;
         case 0xed: UnimplementedInstruction(state); break;
         case 0xf1: UnimplementedInstruction(state); break;
         case 0xf3: UnimplementedInstruction(state); break;
@@ -595,6 +592,28 @@ void opSHLD(State8080* state) {
     state->memory[firstAddr] = state->L;
     state->memory[firstAddr+1] = state->H;
     state->PC += 2;
+}
+
+void opLDAX(State8080* state, u_int8_t* firstReg, u_int8_t* secondReg) {
+    u_int16_t addr = wordFromBytes(*firstReg, *secondReg);
+    state->A = state->memory[addr];
+}
+
+void opSTAX(State8080* state, u_int8_t* firstReg, u_int8_t* secondReg) {
+    u_int16_t addr = wordFromBytes(*firstReg, *secondReg);
+    state->memory[addr] = state->A;
+}
+
+void opXCHG(State8080* state) {
+    u_int8_t tmp;
+
+    tmp = state->H;
+    state->H = state->D;
+    state->D = tmp;
+
+    tmp = state->L;
+    state->L = state->E;
+    state->E = tmp;
 }
 
 /**
