@@ -190,21 +190,21 @@ void emulateOp8080(State8080* state) {
         case 0x7d: opMOV(&state->A, &state->L); break;
         case 0x7f: opMOV(&state->A, &state->A); break;
 
-        case 0x46: opMOV(&state->B, (u_int8_t*) getHLValue(state)); break;
-        case 0x4e: opMOV(&state->C, (u_int8_t*) getHLValue(state)); break;
-        case 0x56: opMOV(&state->D, (u_int8_t*) getHLValue(state)); break;
-        case 0x5e: opMOV(&state->E, (u_int8_t*) getHLValue(state)); break;
-        case 0x66: opMOV(&state->H, (u_int8_t*) getHLValue(state)); break;
-        case 0x6e: opMOV(&state->L, (u_int8_t*) getHLValue(state)); break;
-        case 0x7e: opMOV(&state->A, (u_int8_t*) getHLValue(state)); break;
+        case 0x46: opMOV(&state->B, state->memory + getHLValue(state)); break;
+        case 0x4e: opMOV(&state->C, state->memory + getHLValue(state)); break;
+        case 0x56: opMOV(&state->D, state->memory + getHLValue(state)); break;
+        case 0x5e: opMOV(&state->E, state->memory + getHLValue(state)); break;
+        case 0x66: opMOV(&state->H, state->memory + getHLValue(state)); break;
+        case 0x6e: opMOV(&state->L, state->memory + getHLValue(state)); break;
+        case 0x7e: opMOV(&state->A, state->memory + getHLValue(state)); break;
 
-        case 0x70: opMOV((u_int8_t*) getHLValue(state), &state->B); break;
-        case 0x71: opMOV((u_int8_t*) getHLValue(state), &state->C); break;
-        case 0x72: opMOV((u_int8_t*) getHLValue(state), &state->D); break;
-        case 0x73: opMOV((u_int8_t*) getHLValue(state), &state->E); break;
-        case 0x74: opMOV((u_int8_t*) getHLValue(state), &state->H); break;
-        case 0x75: opMOV((u_int8_t*) getHLValue(state), &state->L); break;
-        case 0x77: opMOV((u_int8_t*) getHLValue(state), &state->A); break;
+        case 0x70: opMOV(state->memory + getHLValue(state), &state->B); break;
+        case 0x71: opMOV(state->memory + getHLValue(state), &state->C); break;
+        case 0x72: opMOV(state->memory + getHLValue(state), &state->D); break;
+        case 0x73: opMOV(state->memory + getHLValue(state), &state->E); break;
+        case 0x74: opMOV(state->memory + getHLValue(state), &state->H); break;
+        case 0x75: opMOV(state->memory + getHLValue(state), &state->L); break;
+        case 0x77: opMOV(state->memory + getHLValue(state), &state->A); break;
 
         case 0x06: opMVI(state, &state->B); break;
         case 0x0e: opMVI(state, &state->C); break;
@@ -214,7 +214,7 @@ void emulateOp8080(State8080* state) {
         case 0x2e: opMVI(state, &state->L); break;
         case 0x3e: opMVI(state, &state->A); break;
 
-        case 0x36: opMVI(state, (u_int8_t*) getHLValue(state)); break;
+        case 0x36: opMVI(state, state->memory + getHLValue(state)); break;
 
         // LXI
         case 0x01: opLXI(state, opCode, &state->B, &state->C); break;
