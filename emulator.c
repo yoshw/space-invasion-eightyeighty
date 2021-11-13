@@ -79,7 +79,15 @@ void opRETConditional(State8080* state, u_int8_t condition);
 void opRST(State8080* state, u_int8_t exp);
 void opPCHL(State8080* state);
 
-void pushPCToStack(State8080* state);
+void opXTHL(State8080* state);
+
+void pushPC(State8080* state);
+void push(State8080* state, u_int8_t highOrderVal, u_int8_t lowOrderVal);
+void pop(State8080* state, u_int8_t* highOrderReg, u_int8_t* lowOrderReg);
+
+u_int8_t makePSW(State8080* state);
+void setStateFromPsw(State8080* state, u_int8_t psw);
+
 u_int8_t dereferenceHL(State8080* state);
 u_int16_t getHLValue(State8080* state);
 u_int16_t wordFromBytes(u_int8_t left, u_int8_t right);
@@ -121,7 +129,7 @@ int emulate8080(FILE *f) {
     };
 
     int ops = 0;
-    int OP_LIMIT = 100000;
+    int OP_LIMIT = 1000000;
     while (ops < OP_LIMIT) {
         printf("[ Ops executed: %8d ]\n", ops);
         emulateOp8080(&state);
@@ -506,18 +514,62 @@ void emulateOp8080(State8080* state) {
 
 
         // Stack, I/O, and Machine Control group
-        // case 0xc5: printf("PUSH   B-C"); break;
-        // case 0xd5: printf("PUSH   D-E"); break;
-        // case 0xe5: printf("PUSH   H-L"); break;
-        // case 0xf5: printf("PUSH   PSW"); break;
 
-        // case 0xc1: printf("POP    B-C"); break;
-        // case 0xd1: printf("POP    D-E"); break;
-        // case 0xe1: printf("POP    H-L"); break;
-        // case 0xf1: printf("POP    PSW"); break;
+        // PUSH B-C
+        case 0xc5: {
+            push(state, state->B, state->C);
+            break;
+        }
 
-        // case 0xe3: printf("XTHL"); break;
-        // case 0xf9: printf("SPHL"); break;
+        // PUSH   D-E
+        case 0xd5: {
+            push(state, state->D, state->E);
+            break;
+        }
+        // PUSH   H-L
+        case 0xe5: {
+            push(state, state->H, state->L);
+            break;
+        }
+
+        // PUSH PSW
+        case 0xf5: {
+            push(state, state->A, makePSW(state));
+            break;
+        }
+
+        // POP   B-C
+        case 0xc1: {
+            pop(state, &state->B, &state->C);
+            break;
+        }
+
+        // POP   D-E
+        case 0xd1: {
+            pop(state, &state->D, &state->E);
+            break;
+        }
+        // POP   H-L
+        case 0xe1: {
+            pop(state, &state->H, &state->L);
+            break;
+        }
+
+        // POP PSW
+        case 0xf1: {
+            u_int8_t storedPsw = 0;
+            pop(state, &state->A, &storedPsw);
+            setStateFromPsw(state, storedPsw);
+            break;
+        }
+
+        case 0xe3: opXTHL(state); break;
+
+        // SPHL
+        case 0xf9: {
+            state->SP = getHLValue(state);
+            break;
+        }
 
         // IN
         case 0xdb: {
@@ -558,20 +610,10 @@ void emulateOp8080(State8080* state) {
         case 0x28: UnimplementedInstruction(state); break;
         case 0x30: UnimplementedInstruction(state); break;
         case 0x38: UnimplementedInstruction(state); break;
-        case 0xc1: UnimplementedInstruction(state); break;
-        case 0xc5: UnimplementedInstruction(state); break;
         case 0xcb: UnimplementedInstruction(state); break;
-        case 0xd1: UnimplementedInstruction(state); break;
-        case 0xd5: UnimplementedInstruction(state); break;
         case 0xd9: UnimplementedInstruction(state); break;
         case 0xdd: UnimplementedInstruction(state); break;
-        case 0xe1: UnimplementedInstruction(state); break;
-        case 0xe3: UnimplementedInstruction(state); break;
-        case 0xe5: UnimplementedInstruction(state); break;
         case 0xed: UnimplementedInstruction(state); break;
-        case 0xf1: UnimplementedInstruction(state); break;
-        case 0xf5: UnimplementedInstruction(state); break;
-        case 0xf9: UnimplementedInstruction(state); break;
         case 0xfd: UnimplementedInstruction(state); break;
     }
 
@@ -811,7 +853,7 @@ void opJMPConditional(State8080* state, u_int8_t* opPointer, u_int8_t condition)
 }
 
 void opCALL(State8080* state, u_int8_t* opPointer) {
-    pushPCToStack(state);
+    pushPC(state);
 
     state->PC = wordFromBytes(opPointer[2], opPointer[1]);
 
@@ -842,7 +884,7 @@ void opRETConditional(State8080* state, u_int8_t condition) {
 }
 
 void opRST(State8080* state, u_int8_t exp) {
-    pushPCToStack(state);
+    pushPC(state);
 
     state->PC = exp * 8;
 
@@ -926,12 +968,61 @@ void opCPI(State8080* state) {
     state->PC += 1;
 }
 
+void opXTHL(State8080* state) {
+    u_int8_t tmp;
+
+    tmp = state->L;
+    state->L = state->memory[state->SP];
+    state->memory[state->SP] = tmp;
+
+    tmp = state->H;
+    state->H = state->memory[state->SP+1];
+    state->memory[state->SP+1] = tmp;
+}
+
 // Utilities
 
-void pushPCToStack(State8080* state) {
-    state->memory[state->SP-1] = (state->PC >> 8);
-    state->memory[state->SP-2] = (state->PC & 0xff);
+void pushPC(State8080* state) {
+    push(
+        state,
+        (state->PC >> 8),
+        (state->PC & 0xff)
+    );
+}
+
+void push(State8080* state, u_int8_t highOrderVal, u_int8_t lowOrderVal) {
+    state->memory[state->SP-1] = highOrderVal;
+    state->memory[state->SP-2] = lowOrderVal;
     state->SP -= 2;
+}
+
+void pop(State8080* state, u_int8_t* highOrderReg, u_int8_t* lowOrderReg) {
+    *lowOrderReg = state->memory[state->SP];
+    *highOrderReg = state->memory[state->SP+1];
+    state->SP += 2;
+}
+
+u_int8_t makePSW(State8080* state) {
+    u_int8_t psw = (
+        state->codes.S  << 7 |
+        state->codes.Z  << 6 |
+        0               << 5 |
+        state->codes.AC << 4 |
+        0               << 3 |
+        state->codes.P  << 2 |
+        1               << 1 |
+        state->codes.CY
+    );
+
+    return psw;
+}
+
+void setStateFromPsw(State8080* state, u_int8_t psw) {
+    state->codes.S  = (0x80 == (psw & 0x80));
+    state->codes.Z  = (0x40 == (psw & 0x40));
+    state->codes.AC = (0x10 == (psw & 0x10));
+    state->codes.P  = (0x04 == (psw & 0x04));
+    state->codes.CY = (0x01 == (psw & 0x01));
 }
 
 u_int8_t dereferenceHL(State8080* state) {
