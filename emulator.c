@@ -121,8 +121,11 @@ int emulate8080(FILE *f) {
     };
 
     int ops = 0;
-    while (ops < 100) {
+    int OP_LIMIT = 100000;
+    while (ops < OP_LIMIT) {
+        printf("[ Ops executed: %8d ]\n", ops);
         emulateOp8080(&state);
+        ops += 1;
     }
 
     return 0;
@@ -502,6 +505,52 @@ void emulateOp8080(State8080* state) {
         case 0xe9: opPCHL(state); break;
 
 
+        // Stack, I/O, and Machine Control group
+        // case 0xc5: printf("PUSH   B-C"); break;
+        // case 0xd5: printf("PUSH   D-E"); break;
+        // case 0xe5: printf("PUSH   H-L"); break;
+        // case 0xf5: printf("PUSH   PSW"); break;
+
+        // case 0xc1: printf("POP    B-C"); break;
+        // case 0xd1: printf("POP    D-E"); break;
+        // case 0xe1: printf("POP    H-L"); break;
+        // case 0xf1: printf("POP    PSW"); break;
+
+        // case 0xe3: printf("XTHL"); break;
+        // case 0xf9: printf("SPHL"); break;
+
+        // IN
+        case 0xdb: {
+            // TODO: implement this for real
+            state->PC += 1;
+            break;
+        }
+        // OUT
+        case 0xd3: {
+            // TODO: implement this for real
+            state->PC += 1;
+            break;
+        }
+
+        // EI
+        case 0xfb: {
+            state->int_enable = 1;
+            break;
+        }
+        // DI
+        case 0xf3: {
+            state->int_enable = 0;
+            break;
+        }
+
+        // HLT
+        case 0x76: {
+            exit(0);
+        }
+
+        case 0x00: break; // NOP
+
+
         case 0x08: UnimplementedInstruction(state); break;
         case 0x10: UnimplementedInstruction(state); break;
         case 0x18: UnimplementedInstruction(state); break;
@@ -509,40 +558,35 @@ void emulateOp8080(State8080* state) {
         case 0x28: UnimplementedInstruction(state); break;
         case 0x30: UnimplementedInstruction(state); break;
         case 0x38: UnimplementedInstruction(state); break;
-        case 0x76: UnimplementedInstruction(state); break;
         case 0xc1: UnimplementedInstruction(state); break;
         case 0xc5: UnimplementedInstruction(state); break;
         case 0xcb: UnimplementedInstruction(state); break;
         case 0xd1: UnimplementedInstruction(state); break;
-        case 0xd3: UnimplementedInstruction(state); break;
         case 0xd5: UnimplementedInstruction(state); break;
         case 0xd9: UnimplementedInstruction(state); break;
-        case 0xdb: UnimplementedInstruction(state); break;
         case 0xdd: UnimplementedInstruction(state); break;
         case 0xe1: UnimplementedInstruction(state); break;
         case 0xe3: UnimplementedInstruction(state); break;
         case 0xe5: UnimplementedInstruction(state); break;
         case 0xed: UnimplementedInstruction(state); break;
         case 0xf1: UnimplementedInstruction(state); break;
-        case 0xf3: UnimplementedInstruction(state); break;
         case 0xf5: UnimplementedInstruction(state); break;
         case 0xf9: UnimplementedInstruction(state); break;
-        case 0xfb: UnimplementedInstruction(state); break;
         case 0xfd: UnimplementedInstruction(state); break;
-
-        // Stack, I/O, and Machine Control group
-        case 0x00: break; // NOP
     }
 
     // operation consumed, so advance
     state->PC++;
 
-    printf("==> Resulting processor state\n");
-    printf("    C=%d,P=%d,S=%d,Z=%d,AC=%d\n",
-        state->codes.CY, state->codes.P, state->codes.S, state->codes.Z, state->codes.AC);
-    printf("    A $%02x | B $%02x C $%02x | D $%02x E $%02x | H $%02x L $%02x\n",
-        state->A, state->B, state->C, state->D, state->E, state->H, state->L);
-    printf("    SP $%04x\n\n", state->SP);
+    printf(
+        "==> Resulting processor state\n"
+        "    C=%d,P=%d,S=%d,Z=%d,AC=%d\n"
+        "    A $%02x | B $%02x C $%02x | D $%02x E $%02x | H $%02x L $%02x\n"
+        "    SP $%04x\n\n",
+        state->codes.CY, state->codes.P, state->codes.S, state->codes.Z, state->codes.AC,
+        state->A, state->B, state->C, state->D, state->E, state->H, state->L,
+        state->SP
+    );
 }
 
 // Operation functions
